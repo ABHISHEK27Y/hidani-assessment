@@ -6,7 +6,7 @@
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ABHISHEK27Y/hidani-assessment)
 
-Orbit reads a resume, explains relevant jobs, refines results through conversation, and keeps application progress in one workspace. It is built for the Hidani Tech SDE Intern assessment with Python/FastAPI, browser JavaScript, a 1,800-job JSON snapshot, and SQLite. The interface uses black glass panels and muted purple accents, with desktop, tablet and phone layouts.
+Orbit reads a resume, explains relevant jobs, refines results through conversation, and keeps application progress in one workspace. It is built for the Hidani Tech SDE Intern assessment with Python/FastAPI, browser JavaScript, a 1,800-job JSON snapshot, and SQLite locally or PostgreSQL on Render. The interface uses black glass panels and muted purple accents, with desktop, tablet and phone layouts.
 
 ![Orbit desktop workspace](docs/screenshots/desktop.jpg)
 
@@ -58,7 +58,7 @@ flowchart LR
   UI[Conversation UI] --> API[FastAPI]
   API --> Parse[Resume parsing tool]
   Parse --> Profile[Structured profile]
-  Profile --> DB[(SQLite)]
+  Profile --> DB[(SQLite / PostgreSQL)]
   API --> Agent[Orchestrator]
   Agent -. ambiguous intent .-> LLM[Gemini function call by default]
   Agent --> Match[Matching tool]
@@ -77,7 +77,7 @@ flowchart LR
 - **Memory:** Rich message payloads restore profile cards, job results and application records after reload. The server keeps up to 200 messages per workspace and returns the latest 40.
 - **Persistence:** Local SQLite or hosted PostgreSQL transactions and a unique `(session_id, job_id)` key prevent duplicates, including simultaneous requests. Set `DATABASE_URL` to select PostgreSQL. Started and submitted timestamps are distinct. The browser holds an anonymous UUID; there is no account creation.
 
-Anonymous UUIDs act as bearer secrets. Anyone who knows a workspace ID can access that workspace. This is a no-auth assessment app with local SQLite storage, not an encrypted vault or cross-device account system. Do not publish the application database, `.env`, private resume, or private test files. The repository ignores PDF/DOCX files and temporary verification data.
+Anonymous UUIDs act as bearer secrets. Anyone who knows a workspace ID can access that workspace. This is a no-auth assessment app with SQLite locally and PostgreSQL on Render, not an encrypted vault or cross-device account system. Do not publish the application database, `.env`, private resume, or private test files. The repository ignores PDF/DOCX files and temporary verification data.
 
 ## API
 
