@@ -1,8 +1,8 @@
 # Orbit — a conversational job search workspace
 
-[![Verify project](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml)
+[![Verify project](https://github.com/ABHISHEK27Y/hidani-assignmnet/actions/workflows/ci.yml/badge.svg)](https://github.com/ABHISHEK27Y/hidani-assignmnet/actions/workflows/ci.yml)
 
-[Public repository](https://github.com/ABHISHEK27Y/hidani-assessment) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assessment/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
+[Public repository](https://github.com/ABHISHEK27Y/hidani-assignmnet) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assignmnet/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
 
 Orbit reads a resume, explains relevant jobs, refines results through conversation, and keeps application progress in one workspace. It is built for the Hidani Tech SDE Intern assessment with Python/FastAPI, browser JavaScript, a 1,800-job JSON snapshot, and SQLite. The interface uses black glass panels and muted purple accents, with desktop, tablet and phone layouts.
 

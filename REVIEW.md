@@ -70,7 +70,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 
 ## Release handoff
 
-- Public source target: https://github.com/ABHISHEK27Y/hidani-assessment
+- Public source target: https://github.com/ABHISHEK27Y/hidani-assignmnet
 - Full instructions: `DEPLOYMENT.md`.
 - Windows launcher: `scripts/run.ps1`.
 - Deployment configuration: `Dockerfile`, `compose.yaml`, `railway.json`, `requirements.txt`, `constraints.txt` and `.env.example`.

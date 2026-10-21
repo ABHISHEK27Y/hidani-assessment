@@ -64,7 +64,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **S02 — Done:** JSON job database and scraper are included.
 - [x] **S03 — Done:** README covers setup, agent architecture, dataflow, APIs, configuration, limitations and verification commands.
 - [x] **S04 — Done:** A 3–5 minute recording outline is prepared in `DEMO.md`.
-- [x] **S05 — Done:** Public source repository: https://github.com/ABHISHEK27Y/hidani-assessment. Its JSON catalogue, scraper, documentation and tests are included.
+- [x] **S05 — Done:** Public source repository: https://github.com/ABHISHEK27Y/hidani-assignmnet. Its JSON catalogue, scraper, documentation and tests are included.
 - [ ] **S06 — User deployment:** Docker, Compose, Railway configuration, deployment instructions and a synthetic smoke checker are supplied. The user will create the live link and run the public-domain check.
 - [ ] **S07 — Pending release:** The actual 3–5 minute screen recording.
 - [ ] **S08 — Pending release:** Final submission of URLs, code/data and recording.

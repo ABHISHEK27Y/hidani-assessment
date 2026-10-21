@@ -71,7 +71,7 @@ Open **http://127.0.0.1:8000**. The named `orbit-data` volume preserves SQLite d
 
 ## Railway: deploy your GitHub repository
 
-1. In Railway, create a project and deploy **ABHISHEK27Y/hidani-assessment** from GitHub. Select the branch containing the latest release commit (`main` after publication).
+1. In Railway, create a project and deploy **ABHISHEK27Y/hidani-assignmnet** from GitHub. Select the branch containing the latest release commit (`main` after publication).
 2. Railway reads `railway.json` and builds the included Dockerfile. You do not need Node.js or a frontend build command.
 3. Attach a **persistent volume mounted at `/data`** to this service.
 4. Set the service variables below. The first one is required for persistent application history:

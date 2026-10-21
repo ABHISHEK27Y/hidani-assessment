@@ -47,8 +47,8 @@
   "external_employer_submission_verified": false,
   "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
   "deployment": "User will deploy; configuration and synthetic smoke checker included",
-  "public_repository": "https://github.com/ABHISHEK27Y/hidani-assessment",
-  "github_ci": "passed",
+  "public_repository": "https://github.com/ABHISHEK27Y/hidani-assignmnet",
+  "github_ci": "pending",
   "recording": "Outline prepared; recording pending release",
   "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report."
 }
