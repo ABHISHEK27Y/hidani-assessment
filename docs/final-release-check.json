@@ -36,7 +36,7 @@
   },
   "employer_auto_submission": "not_implemented_assisted_workflow_only",
   "screen_recording": "not_recorded_script_in_DEMO.md",
-  "note": "Local checks are not evidence of a live Railway deployment. Reports exclude resume contact values and credentials.",
+  "note": "The public Render HTTP checks used a fictional profile. Reports exclude resume contact values and credentials.",
   "github_ci": {
     "head_sha": "20f84636b0e8f054b86b03cab608f58505975104",
     "conclusion": "success",
@@ -54,9 +54,10 @@
   "render": {
     "blueprint": "render.yaml",
     "free_web_and_postgres": true,
-    "public_url": null,
-    "public_http_tests": "not_run",
-    "hosted_persistence_test": "not_run",
+    "public_url": "https://orbit-assessment-r2j9.onrender.com",
+    "public_http_tests": "13_of_13_passed_2026-10-21",
+    "hosted_gemini_routing": "configured_but_local_fallback_observed",
+    "hosted_persistence_test": "pending_redeployment",
     "postgres_container_smoke": "passed_in_github_ci"
   }
 }

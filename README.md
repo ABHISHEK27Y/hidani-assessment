@@ -2,7 +2,7 @@
 
 [![Verify project](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml)
 
-[Public repository](https://github.com/ABHISHEK27Y/hidani-assessment) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assessment/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
+[Live app](https://orbit-assessment-r2j9.onrender.com) · [Public repository](https://github.com/ABHISHEK27Y/hidani-assessment) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assessment/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ABHISHEK27Y/hidani-assessment)
 
@@ -127,4 +127,4 @@ Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. T
 
 ## Release phase
 
-The current free-host path is Render: `render.yaml` defines a free Docker web service and free PostgreSQL database. The database preserves application history when the web service sleeps or restarts. Railway rejected project creation during its 21 October outage. **There is no verified live link yet.** Follow [DEPLOYMENT.md](DEPLOYMENT.md). Public-domain verification, a persistence check after redeployment, and the actual 3–5 minute recording remain pending. See [release evidence](docs/final-release-check.json).
+The [live Render app](https://orbit-assessment-r2j9.onrender.com) uses a free Docker web service and free PostgreSQL database. Its public `/health` endpoint and all 13 synthetic HTTP smoke checkpoints passed on 21 October. The hosted Gemini key is configured, but an ambiguous prompt fell back to local rules; hosted Gemini routing remains under review. Persistence across a web-service redeployment and the actual 3–5 minute recording remain pending. See [release evidence](docs/final-release-check.json).

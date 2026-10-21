@@ -32,7 +32,7 @@ Confirm at least three results exist. Send **apply to job 3**. Show the applicat
 
 Send **show my applied jobs**. Show the job, date and status. Reload. Do not click **I submitted this** unless you actually submitted the external form.
 
-“Here I can see my tracked application, its date and its current status. The profile, messages and application records are saved in SQLite. When I refresh the browser, the conversation and results return. Each anonymous workspace has its own records, and the app does not require a login.”
+“Here I can see my tracked application, its date and its current status. The hosted app saves profile, messages and application records in PostgreSQL. When I refresh the browser, the conversation and results return. Each anonymous workspace has its own records, and the app does not require a login.”
 
 ## 3:20–3:50 — Show error handling
 

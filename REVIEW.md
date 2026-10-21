@@ -84,11 +84,11 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 1. **Real employer submission is incomplete.** Assisted mode returns the original form and records candidate confirmation. Simulation mode creates a visibly simulated local receipt. Neither proves that an employer received an application.
 2. **Gemini is verified and quota-limited.** Gemini 3.8 Flash is the default and passed both a live synthetic function call and the full HTTP/orchestrator/matching flow. Its Free tier follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json`.
 3. **External source pages could not be verified.** Sample HTTP requests returned 403 and the browser displayed a security-verification screen. The source API worked; the blocker was not bypassed.
-4. **Railway deployment is blocked by an outage.** The connected account was verified, and project creation was attempted. Railway returned “Deploys have been paused temporarily”. The [official status page](https://status.railway.com/) reported “Dashboard and API unavailable, builds paused”, with builds paused in all regions. Its observed update was 21 October, 11:33 UTC (5:03 PM IST). No project, service or public domain was created. Therefore public HTTP checks, hosted Gemini routing and persistence after redeployment are not marked passed. The Docker image has passed GitHub CI; that is separate evidence from hosting.
+4. **The app is live on Render.** Railway rejected project creation during its outage, so the free Render Blueprint was used. The [public web service](https://orbit-assessment-r2j9.onrender.com) and free PostgreSQL database were created successfully. The public readiness check and all 13 synthetic HTTP smoke checkpoints passed. Hosted Gemini routing still fell back to local rules despite a nonempty key, and PostgreSQL persistence across a web-service redeployment has not yet been checked. These are open release checks.
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
 6. **Parsing is conservative text extraction.** Scanned resumes need OCR or a text-based export. More layouts should be added as regression fixtures when encountered; there is no claim of perfect parsing of every resume.
 7. **Installation is reproducible.** The isolated Python environment passed dependency checks and all tests. `constraints.txt` records package versions without local wheel paths; Linux/container compatibility is checked in CI.
-8. **The free Render storage path is tested in CI.** The Docker image starts with `DATABASE_URL` pointing to a real PostgreSQL container. Readiness and all 13 synthetic HTTP smoke checks pass, covering resume parsing, matching, application tracking, duplicate prevention, history and reset. The local SQLite path also remains verified. The exact Linux run is recorded in `docs/ci-verification.json`.
+8. **The free Render storage path is tested in CI and the public app.** The Docker image starts with `DATABASE_URL` pointing to a real PostgreSQL container in CI. Readiness and all 13 synthetic HTTP smoke checks pass there and on the public Render URL, covering resume parsing, matching, application tracking, duplicate prevention, history and reset. The local SQLite path also remains verified. The exact Linux run is recorded in `docs/ci-verification.json`.
 
 ## Submission cleanup
 
@@ -100,14 +100,13 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 
 ## Remaining release sequence
 
-1. Create a Render Blueprint from the repository's `main` branch. Its `render.yaml` requests one free Docker web service and one free PostgreSQL database.
-2. Supply the Gemini key in Render's secret prompt. Confirm both resources show Free before deployment.
-3. Generate the domain; verify `/health`, the full public HTTP flow and Gemini routing using fictional data.
-4. Redeploy and verify that a disposable workspace survives through PostgreSQL, then remove that test workspace.
-5. Record the five-minute walkthrough and submit the live URL, repository URL and recording. Resolve or explicitly disclose the external-application gap.
+1. Recheck the Gemini secret in Render and confirm that a synthetic ambiguous request reports `router: gemini` on the hosted app.
+2. Verify that the disposable synthetic workspace survives the next web-service redeployment, then remove it.
+3. Record the five-minute walkthrough and submit the [live URL](https://orbit-assessment-r2j9.onrender.com), repository URL and recording. Resolve or explicitly disclose the external-application gap.
 
 ## Release handoff
 
+- Public app: https://orbit-assessment-r2j9.onrender.com
 - Public source target: https://github.com/ABHISHEK27Y/hidani-assessment
 - Full instructions: `DEPLOYMENT.md`.
 - Windows launcher: `scripts/run.ps1`.

@@ -66,9 +66,11 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **S03 — Done:** README covers setup, agent architecture, dataflow, APIs, configuration, limitations and verification commands.
 - [x] **S04 — Done:** A timed five-minute script in simple English is prepared in `DEMO.md`, with screen actions and honest application narration.
 - [x] **S05 — Done:** Public source repository: https://github.com/ABHISHEK27Y/hidani-assessment. Its JSON catalogue, scraper, documentation and tests are included.
-- [ ] **S06 — Render deployment pending:** Railway rejected project creation during its outage. A free Render Blueprint now defines a Docker web service and PostgreSQL database. No public link exists yet, so public HTTP tests and hosted persistence are unverified. The smoke checker is ready.
+- [x] **S06 — Done:** [Render deployment](https://orbit-assessment-r2j9.onrender.com) created a free Docker web service and PostgreSQL database. The public readiness check and all 13 synthetic HTTP smoke checkpoints passed.
 - [ ] **S07 — Pending release:** The actual 3–5 minute screen recording.
 - [ ] **S08 — Pending release:** Final submission of URLs, code/data and recording.
 - [x] **S09 — Deadline recorded:** Assessment received **19 October 2026**; five days later is **24 October 2026**. Submit earlier if possible because no exact cutoff time was provided.
+- [ ] **S10 — Hosted Gemini check incomplete:** The live service reports a configured Gemini key, but a synthetic ambiguous prompt used the local fallback. The deployed key and provider response need rechecking.
+- [ ] **S11 — Hosted persistence check pending:** A synthetic application record was created; verify it survives the next successful web redeployment, then remove it.
 
-The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. A separate Linux container run passed the same HTTP flow against PostgreSQL. Release evidence is in `docs/final-release-check.json`. Before calling the full assessment complete, resolve the external application requirement, deploy to Render, verify the public app and persistence, and record the live flow. See `DEPLOYMENT.md`.
+The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. A separate Linux container run passed the same HTTP flow against PostgreSQL, and the public Render deployment passed all 13 smoke checkpoints. Release evidence is in `docs/final-release-check.json`. Before calling the full assessment complete, resolve or disclose the external application requirement, verify hosted Gemini routing and persistence, and record the live flow. See `DEPLOYMENT.md`.

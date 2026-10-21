@@ -34,6 +34,8 @@ Copy the example only when `.env` does not already contain your configuration.
 
 ## Render: free assessment deployment
 
+The assessment app is live at https://orbit-assessment-r2j9.onrender.com. The public readiness endpoint and all 13 synthetic smoke checkpoints passed on 21 October 2026. Hosted Gemini routing and persistence after a web-service redeployment are still being verified.
+
 The included `render.yaml` defines two resources: a free Docker web service and a free PostgreSQL database. `DATABASE_URL` is filled from the database's internal connection string, so application history is kept outside the web container. The Gemini key is prompted as a secret during Blueprint creation; it is never stored in Git.
 
 1. Use the [Deploy to Render shortcut](https://render.com/deploy?repo=https://github.com/ABHISHEK27Y/hidani-assessment), or select **New → Blueprint** in the Render Dashboard and connect `ABHISHEK27Y/hidani-assessment` on `main`. Render reads `render.yaml`.
