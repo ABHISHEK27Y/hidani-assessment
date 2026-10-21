@@ -22,7 +22,7 @@ def _llm_settings():
     if provider not in {"gemini", "openai", "none"}:
         raise ValueError("LLM_PROVIDER must be gemini, openai or none")
     if provider == "gemini":
-        return provider, os.getenv("GEMINI_MODEL", "gemini-3.8-flash"), os.getenv("GEMINI_API_KEY", "").strip()
+        return provider, os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite"), os.getenv("GEMINI_API_KEY", "").strip()
     if provider == "openai":
         return provider, os.getenv("OPENAI_MODEL", "gpt-4o-mini"), os.getenv("OPENAI_API_KEY", "").strip()
     return provider, None, ""
@@ -80,10 +80,11 @@ def _llm_intent(message: str, conversation: list[dict]) -> dict | None:
         if provider == "openai":
             tool["function"]["strict"] = True
         recent = [{"role": item["role"], "content": item["content"]} for item in conversation[-6:]]
-        client_options = {"api_key": key, "timeout": 25 if provider == "gemini" else 15,
+        client_options = {"api_key": key, "timeout": 35 if provider == "gemini" else 15,
                           "max_retries": 1 if provider == "gemini" else 0,
                           "base_url": GEMINI_BASE_URL if provider == "gemini" else "https://api.openai.com/v1/"}
-        generation = ({"reasoning_effort": "low", "max_tokens": 2048} if provider == "gemini"
+        generation = ({"reasoning_effort": "minimal" if model.endswith("flash-lite") else "low",
+                       "max_tokens": 512 if model.endswith("flash-lite") else 2048} if provider == "gemini"
                       else {"temperature": 0, "parallel_tool_calls": False})
         response = OpenAI(**client_options).chat.completions.create(
             model=model, tools=[tool], **generation,

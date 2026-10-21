@@ -37,7 +37,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **R01 — Done:** A conversational assistant, with resume upload in the conversation and subsequent requests handled as messages.
 - [x] **R02 — Done:** An orchestrator with specialized parsing, matching, profile, application and status tools.
 - [x] **R03 — Done:** Gemini is the default function-calling provider. Arguments are validated with the server's schema before dispatch. An explicit OpenAI option retains its strict schema. Invalid arguments, provider failure and Gemini quota exhaustion fall back to local rules without switching providers.
-- [x] **R04 — Done:** Gemini 3.8 Flash passed both a live synthetic function call and the complete HTTP chat/orchestrator/matching flow. Keys are stored only in ignored local configuration. Redacted evidence is in `docs/llm-verification.json`.
+- [x] **R04 — Done locally:** Gemini 3.8 Flash passed both a live synthetic function call and the complete HTTP chat/orchestrator/matching flow. The hosted routing default is now Gemini 3.5 Flash-Lite for lower latency; its public deployment check is tracked in S10. Keys are stored only in ignored local configuration. Redacted historical evidence is in `docs/llm-verification.json`.
 - [x] **R05 — Done:** Conversation memory and rich results survive reload through SQLite-backed history.
 - [x] **R06 — Done:** Applications store job ID, initiation/submission dates and status. Duplicate protection is enforced by a unique database key, including simultaneous requests.
 - [x] **R07 — Done:** Unreadable, empty, scanned, password-protected, unsupported and oversized resume errors are handled clearly.
@@ -70,7 +70,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [ ] **S07 — Pending release:** The actual 3–5 minute screen recording.
 - [ ] **S08 — Pending release:** Final submission of URLs, code/data and recording.
 - [x] **S09 — Deadline recorded:** Assessment received **19 October 2026**; five days later is **24 October 2026**. Submit earlier if possible because no exact cutoff time was provided.
-- [ ] **S10 — Hosted Gemini check incomplete:** The live service reports a configured Gemini key, but a synthetic ambiguous prompt used the local fallback. The deployed key and provider response need rechecking.
-- [ ] **S11 — Hosted persistence check pending:** A synthetic application record was created; verify it survives the next successful web redeployment, then remove it.
+- [ ] **S10 — Hosted Gemini check incomplete:** The live service had a nonempty but incorrect provider key, so a synthetic ambiguous prompt used the local fallback. Replace it with the Gemini key and recheck.
+- [x] **S11 — Done:** A fictional resume and application survived a successful Render web-service redeployment. The disposable workspace was then removed.
 
-The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. A separate Linux container run passed the same HTTP flow against PostgreSQL, and the public Render deployment passed all 13 smoke checkpoints. Release evidence is in `docs/final-release-check.json`. Before calling the full assessment complete, resolve or disclose the external application requirement, verify hosted Gemini routing and persistence, and record the live flow. See `DEPLOYMENT.md`.
+The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. A separate Linux container run passed the same HTTP flow against PostgreSQL, and the public Render deployment passed all 13 smoke checkpoints. The hosted application record survived a redeployment. Release evidence is in `docs/final-release-check.json`. Before calling the full assessment complete, resolve or disclose the external application requirement, verify hosted Gemini routing, and record the live flow. See `DEPLOYMENT.md`.

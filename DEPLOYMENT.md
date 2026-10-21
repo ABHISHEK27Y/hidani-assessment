@@ -34,7 +34,7 @@ Copy the example only when `.env` does not already contain your configuration.
 
 ## Render: free assessment deployment
 
-The assessment app is live at https://orbit-assessment-r2j9.onrender.com. The public readiness endpoint and all 13 synthetic smoke checkpoints passed on 21 October 2026. Hosted Gemini routing and persistence after a web-service redeployment are still being verified.
+The assessment app is live at https://orbit-assessment-r2j9.onrender.com. The public readiness endpoint and all 13 synthetic smoke checkpoints passed on 21 October 2026. A fictional application survived a web-service redeployment and was removed afterward. Hosted Gemini routing is still being verified after correcting its Render secret.
 
 The included `render.yaml` defines two resources: a free Docker web service and a free PostgreSQL database. `DATABASE_URL` is filled from the database's internal connection string, so application history is kept outside the web container. The Gemini key is prompted as a secret during Blueprint creation; it is never stored in Git.
 
@@ -51,13 +51,13 @@ The included `render.yaml` defines two resources: a free Docker web service and 
 Local parsing, recommendations, supported chat commands and tracking work without a provider key. Ambiguous phrasing uses Gemini function calling when its key is configured.
 
 1. Open [Google AI Studio API keys](https://aistudio.google.com/apikey), sign in and create a key in your project.
-2. Confirm the project is on Google's **Free tier**. Gemini 3.8 Flash currently has free input/output usage on that tier, subject to your project's active limits. A key is associated with a project; the model is selected by the app. Do not enable paid billing if your intention is to stay on the free tier.
+2. Confirm the project is on Google's **Free tier**. Gemini 3.5 Flash-Lite currently has free input/output usage on that tier, subject to your project's active limits. A key is associated with a project; the model is selected by the app. Do not enable paid billing if your intention is to stay on the free tier.
 3. Edit the ignored `.env` locally:
 
 ```dotenv
 LLM_PROVIDER=gemini
 GEMINI_API_KEY=replace_with_your_actual_key
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.5-flash-lite
 DATABASE_PATH=data/app.db
 JOBS_PATH=data/jobs.json
 APPLICATION_MODE=assisted
@@ -101,7 +101,7 @@ Open **http://127.0.0.1:8000**. The named `orbit-data` volume preserves SQLite d
 | `APPLICATION_MODE` | `assisted` |
 | `LLM_PROVIDER` | `gemini` |
 | `GEMINI_API_KEY` | Your Google AI Studio key |
-| `GEMINI_MODEL` | `gemini-3.8-flash` |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite` |
 
 The catalogue is bundled in the image. Leave `JOBS_PATH` unset. Railway injects `PORT`, which the container start command reads automatically. Keep **one replica** for this SQLite deployment.
 

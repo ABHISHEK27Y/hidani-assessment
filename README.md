@@ -31,7 +31,7 @@ Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. 
 |---|---|---|
 | `LLM_PROVIDER` | `gemini` | Select `gemini`, explicit `openai`, or `none` for local commands only |
 | `GEMINI_API_KEY` | unset | Google AI Studio key for Gemini intent interpretation |
-| `GEMINI_MODEL` | `gemini-3.8-flash` | Default Gemini model; has a Google-documented free API tier |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Default low-latency Gemini routing model; has a Google-documented free API tier |
 | `DATABASE_PATH` | `data/app.db` | Local SQLite database path |
 | `DATABASE_URL` | unset | PostgreSQL URL; selects persistent Postgres storage on free hosts |
 | `JOBS_PATH` | `data/jobs.json` | Job snapshot location |
@@ -39,9 +39,9 @@ Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. 
 | `OPENAI_MODEL` | `gpt-4o-mini` | Model for the explicit OpenAI provider |
 | `APPLICATION_MODE` | `assisted` | Assisted external handoff, or explicit `simulation` for assessment demos |
 
-The local router supports resume-driven matching, remote/on-site filters, multiple skills, countries, entry-level and internship filters, pagination, profile corrections, job details, application initiation and status queries. **Gemini 3.8 Flash is the default LLM** for ambiguous phrasing, with server-validated function arguments. Both a live synthetic function call and the full HTTP/orchestrator/matching flow passed with Gemini. The app continues with local rules on provider failure or quota exhaustion; it never automatically switches providers. OpenAI remains an explicit optional setting. No key is included in the repository.
+The local router supports resume-driven matching, remote/on-site filters, multiple skills, countries, entry-level and internship filters, pagination, profile corrections, job details, application initiation and status queries. **Gemini 3.5 Flash-Lite is the default LLM** for ambiguous phrasing, with server-validated function arguments. Gemini 3.8 Flash previously passed a live synthetic function call and the full HTTP/orchestrator/matching flow; the lower-latency model was selected for the hosted router. The app continues with local rules on provider failure or quota exhaustion; it never automatically switches providers. OpenAI remains an explicit optional setting. No key is included in the repository.
 
-Google currently lists free input/output usage for Gemini 3.8 Flash on its [Free tier](https://ai.google.dev/gemini-api/docs/pricing). Use a Free-tier project in [Google AI Studio](https://aistudio.google.com/apikey); quotas and eligibility are account-specific. This app cannot change your project's billing tier. Free-tier conversations may be used to improve Google's products. Resume files are parsed locally, and profile payloads are excluded from model requests; recent conversation text is sent for ambiguous requests, so use fictional data for public demos. See [Google's compatibility documentation](https://ai.google.dev/gemini-api/docs/openai) for the SDK endpoint used.
+Google currently lists free input/output usage for Gemini 3.5 Flash-Lite on its [Free tier](https://ai.google.dev/gemini-api/docs/pricing). Use a Free-tier project in [Google AI Studio](https://aistudio.google.com/apikey); quotas and eligibility are account-specific. This app cannot change your project's billing tier. Free-tier conversations may be used to improve Google's products. Resume files are parsed locally, and profile payloads are excluded from model requests; recent conversation text is sent for ambiguous requests, so use fictional data for public demos. See [Google's compatibility documentation](https://ai.google.dev/gemini-api/docs/openai) for the SDK endpoint used.
 
 ## Application behavior
 
@@ -127,4 +127,4 @@ Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. T
 
 ## Release phase
 
-The [live Render app](https://orbit-assessment-r2j9.onrender.com) uses a free Docker web service and free PostgreSQL database. Its public `/health` endpoint and all 13 synthetic HTTP smoke checkpoints passed on 21 October. The hosted Gemini key is configured, but an ambiguous prompt fell back to local rules; hosted Gemini routing remains under review. Persistence across a web-service redeployment and the actual 3–5 minute recording remain pending. See [release evidence](docs/final-release-check.json).
+The [live Render app](https://orbit-assessment-r2j9.onrender.com) uses a free Docker web service and free PostgreSQL database. Its public `/health` endpoint and all 13 synthetic HTTP smoke checkpoints passed on 21 October. A fictional resume and application survived a web-service redeployment. Hosted Gemini routing remains under review because the deployment initially received an incorrect provider key. The actual 3–5 minute recording remains pending. See [release evidence](docs/final-release-check.json).

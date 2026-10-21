@@ -44,7 +44,7 @@ if __name__ == "__main__":
         "live_llm_call_verified": bool(llm.get("live_function_call_verified")),
         "live_llm_orchestrator_verified": bool(llm.get("http_orchestrator_verified")),
         "llm_provider": llm.get("provider", "gemini"),
-        "llm_model": llm.get("model", "gemini-3.8-flash"),
+        "llm_model": llm.get("model", "gemini-3.5-flash-lite"),
         "external_employer_submission_verified": False,
         "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
         "deployment": args.deployment_status,

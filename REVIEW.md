@@ -82,9 +82,9 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 ## Remaining limits and release work
 
 1. **Real employer submission is incomplete.** Assisted mode returns the original form and records candidate confirmation. Simulation mode creates a visibly simulated local receipt. Neither proves that an employer received an application.
-2. **Gemini is verified and quota-limited.** Gemini 3.8 Flash is the default and passed both a live synthetic function call and the full HTTP/orchestrator/matching flow. Its Free tier follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json`.
+2. **Gemini is verified locally and quota-limited.** Gemini 3.8 Flash passed a live synthetic function call and the full HTTP/orchestrator/matching flow. Gemini 3.5 Flash-Lite is now the default for lower-latency intent routing and supports free-tier function calling. Its hosted check is still pending. The Free tier follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json` for historical 3.8 evidence.
 3. **External source pages could not be verified.** Sample HTTP requests returned 403 and the browser displayed a security-verification screen. The source API worked; the blocker was not bypassed.
-4. **The app is live on Render.** Railway rejected project creation during its outage, so the free Render Blueprint was used. The [public web service](https://orbit-assessment-r2j9.onrender.com) and free PostgreSQL database were created successfully. The public readiness check and all 13 synthetic HTTP smoke checkpoints passed. Hosted Gemini routing still fell back to local rules despite a nonempty key, and PostgreSQL persistence across a web-service redeployment has not yet been checked. These are open release checks.
+4. **The app is live on Render.** Railway rejected project creation during its outage, so the free Render Blueprint was used. The [public web service](https://orbit-assessment-r2j9.onrender.com) and free PostgreSQL database were created successfully. The public readiness check and all 13 synthetic HTTP smoke checkpoints passed. A fictional application survived a web-service redeployment and was then removed. Hosted Gemini routing still fell back to local rules because the deployment initially received an incorrect provider key; correcting and retesting that secret is the remaining service check.
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
 6. **Parsing is conservative text extraction.** Scanned resumes need OCR or a text-based export. More layouts should be added as regression fixtures when encountered; there is no claim of perfect parsing of every resume.
 7. **Installation is reproducible.** The isolated Python environment passed dependency checks and all tests. `constraints.txt` records package versions without local wheel paths; Linux/container compatibility is checked in CI.
@@ -101,8 +101,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 ## Remaining release sequence
 
 1. Recheck the Gemini secret in Render and confirm that a synthetic ambiguous request reports `router: gemini` on the hosted app.
-2. Verify that the disposable synthetic workspace survives the next web-service redeployment, then remove it.
-3. Record the five-minute walkthrough and submit the [live URL](https://orbit-assessment-r2j9.onrender.com), repository URL and recording. Resolve or explicitly disclose the external-application gap.
+2. Record the five-minute walkthrough and submit the [live URL](https://orbit-assessment-r2j9.onrender.com), repository URL and recording. Resolve or explicitly disclose the external-application gap.
 
 ## Release handoff
 

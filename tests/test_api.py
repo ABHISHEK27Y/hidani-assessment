@@ -55,7 +55,7 @@ def test_health_reports_selected_provider_without_exposing_key(client, monkeypat
     monkeypatch.setenv('GEMINI_API_KEY', 'synthetic-health-key')
     response = client.get('/health')
     assert response.json()['llm_provider'] == 'gemini'
-    assert response.json()['llm_model'] == 'gemini-3.8-flash'
+    assert response.json()['llm_model'] == 'gemini-3.5-flash-lite'
     assert response.json()['llm_configured']
     assert 'synthetic-health-key' not in response.text
 
