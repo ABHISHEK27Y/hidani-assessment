@@ -57,6 +57,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **Q08 — Done:** JavaScript syntax and Python compilation checked. Automated test results and environment details are recorded in `docs/verification.json`.
 - [x] **Q09 — Done:** Interactive API documentation renders with a separate nonce-based policy; the main workspace retains its stricter policy.
 - [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 45 tests passed inside `.venv`, including Gemini routing and provider-isolation regressions. A separate synthetic running-server check passed 13/13 checkpoints. The exact GitHub Actions run and source commit are in `docs/ci-verification.json`.
+- [x] **Q11 — Done:** The Render Docker image was tested in GitHub Actions against a real PostgreSQL container. Readiness and all 13 synthetic HTTP smoke checkpoints passed using the Postgres backend.
 
 ## Submission deliverables and timing
 
@@ -70,4 +71,4 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [ ] **S08 — Pending release:** Final submission of URLs, code/data and recording.
 - [x] **S09 — Deadline recorded:** Assessment received **19 October 2026**; five days later is **24 October 2026**. Submit earlier if possible because no exact cutoff time was provided.
 
-The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. Release evidence is in `docs/final-release-check.json`. Before calling the full assessment complete, resolve the external application requirement, deploy after Railway recovers, verify the public app and persistence, and record the live flow. See `DEPLOYMENT.md`.
+The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. A separate Linux container run passed the same HTTP flow against PostgreSQL. Release evidence is in `docs/final-release-check.json`. Before calling the full assessment complete, resolve the external application requirement, deploy to Render, verify the public app and persistence, and record the live flow. See `DEPLOYMENT.md`.

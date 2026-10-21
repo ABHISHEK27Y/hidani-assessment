@@ -88,6 +88,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
 6. **Parsing is conservative text extraction.** Scanned resumes need OCR or a text-based export. More layouts should be added as regression fixtures when encountered; there is no claim of perfect parsing of every resume.
 7. **Installation is reproducible.** The isolated Python environment passed dependency checks and all tests. `constraints.txt` records package versions without local wheel paths; Linux/container compatibility is checked in CI.
+8. **The free Render storage path is tested in CI.** The Docker image starts with `DATABASE_URL` pointing to a real PostgreSQL container. Readiness and all 13 synthetic HTTP smoke checks pass, covering resume parsing, matching, application tracking, duplicate prevention, history and reset. The local SQLite path also remains verified. The exact Linux run is recorded in `docs/ci-verification.json`.
 
 ## Submission cleanup
 
@@ -99,10 +100,10 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 
 ## Remaining release sequence
 
-1. After Railway restores builds, create the project/service from the repository's `main` branch.
-2. Attach `/data`, set `DATABASE_PATH=/data/app.db`, configure the Gemini secret and keep one replica.
+1. Create a Render Blueprint from the repository's `main` branch. Its `render.yaml` requests one free Docker web service and one free PostgreSQL database.
+2. Supply the Gemini key in Render's secret prompt. Confirm both resources show Free before deployment.
 3. Generate the domain; verify `/health`, the full public HTTP flow and Gemini routing using fictional data.
-4. Redeploy and verify that a disposable workspace survives, then remove that test workspace.
+4. Redeploy and verify that a disposable workspace survives through PostgreSQL, then remove that test workspace.
 5. Record the five-minute walkthrough and submit the live URL, repository URL and recording. Resolve or explicitly disclose the external-application gap.
 
 ## Release handoff

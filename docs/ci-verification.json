@@ -1,9 +1,9 @@
 {
-  "id": 39597047864,
-  "head_sha": "bfe58a71f3d7d0ec061ae5f5c6c1559d02c76879",
+  "id": 39608221301,
+  "head_sha": "20f84636b0e8f054b86b03cab608f58505975104",
   "status": "completed",
   "conclusion": "success",
-  "html_url": "https://github.com/ABHISHEK27Y/hidani-assessment/actions/runs/39597047864",
+  "html_url": "https://github.com/ABHISHEK27Y/hidani-assessment/actions/runs/39608221301",
   "runner": "ubuntu-latest / Python 3.12",
   "checks": [
     {
@@ -36,6 +36,18 @@
     },
     {
       "name": "Test running deployment",
+      "conclusion": "success"
+    },
+    {
+      "name": "Start PostgreSQL for free-host verification",
+      "conclusion": "success"
+    },
+    {
+      "name": "Start image with PostgreSQL",
+      "conclusion": "success"
+    },
+    {
+      "name": "Test running PostgreSQL deployment",
       "conclusion": "success"
     }
   ]
