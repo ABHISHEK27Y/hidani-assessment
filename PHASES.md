@@ -7,7 +7,7 @@ The assessment was received on **19 October 2026**. Five days from receipt is **
 | 1. Requirement and source review | Convert brief to acceptance criteria, choose a permitted job source and honest application behavior | Complete |
 | 2. Dataset and core agents | Collect 1,500–2,000 real jobs; parse resumes; rank and explain matches; route conversation; persist tracker | Complete |
 | 3. Product polish and verification | Black glass UI, real-resume verification, HTTP tests, error paths, duplicate protection, responsive checks | Complete; see REVIEW.md for scope and external limitations |
-| 4. Public release | Public GitHub repository, persistent Docker deployment, live smoke test, external application review | Deferred to the afternoon at the user's request |
+| 4. Public release | Public GitHub repository, persistent Docker deployment, live smoke test, external application review | Source and deployment handoff prepared; user will deploy |
 | 5. Submission package | 3–5 minute full-flow recording, final README review, submit live URL and repo | Pending release |
 
 ## Review gates

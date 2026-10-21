@@ -1,15 +1,16 @@
 {
-  "reviewed_at": "2026-10-21T05:33:31.622104+00:00",
+  "reviewed_at": "2026-10-21T11:26:57.722594+00:00",
   "automated_tests": {
     "tests": 39,
     "errors": 0,
     "failures": 0,
     "skipped": 0,
-    "seconds": 11.45
+    "seconds": 5.78
   },
   "runtime": {
     "python": "3.13.2",
     "os": "Windows",
+    "isolated_virtualenv": true,
     "dependencies": {
       "fastapi": "0.115.6",
       "starlette": "0.41.3",
@@ -27,7 +28,7 @@
     "projects_detected": 3,
     "total_initial_matches": 38,
     "react_india_matches": 4,
-    "upload_and_match_ms": 521
+    "upload_and_match_ms": 174
   },
   "actual_resume_http_checkpoints": 15,
   "actual_resume_http_passed": 15,
@@ -41,12 +42,13 @@
     "console_errors_observed": 0,
     "console_warnings_observed": 0
   },
-  "clean_environment_install": "blocked_by_download_timeout",
+  "clean_environment_install": "passed",
   "live_llm_call_verified": false,
   "external_employer_submission_verified": false,
   "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
-  "deployment": "Deferred at user request",
-  "public_repository": "Deferred to release phase",
+  "deployment": "User will deploy; configuration and synthetic smoke checker included",
+  "public_repository": "https://github.com/ABHISHEK27Y/hidani-assessment",
+  "github_ci": "pending",
   "recording": "Outline prepared; recording pending release",
   "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report."
 }

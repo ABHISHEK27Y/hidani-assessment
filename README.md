@@ -13,11 +13,13 @@ python -m venv .venv
 # Windows PowerShell
 .venv\Scripts\Activate.ps1
 # macOS/Linux: source .venv/bin/activate
-pip install -r requirements-dev.txt
+pip install -r requirements-dev.txt -c constraints.txt
 python -m uvicorn app.main:app --reload --no-access-log
 ```
 
 Open `http://127.0.0.1:8000`. Copy `.env.example` to `.env` to configure the app; `.env` is loaded automatically and excluded from Git. `requirements.txt` contains runtime dependencies, while `requirements-dev.txt` adds tests and the HTTP verifier.
+
+Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. For Docker Compose, Railway configuration, API-key setup and troubleshooting, follow **[DEPLOYMENT.md](DEPLOYMENT.md)**. `constraints.txt` pins the dependency versions from the isolated environment.
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -109,8 +111,8 @@ The private-resume verifier accepts only localhost URLs, omits contact values fr
 
 See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the project review](REVIEW.md), [the delivery phases](PHASES.md), and [the recording outline](DEMO.md).
 
-Final local review: 39 automated tests and 15 actual-resume HTTP checkpoints passed. A fresh isolated installation was attempted but did not finish because PyPI requests timed out; the test results describe the existing verified environment. Run the prepared GitHub Actions workflow and a clean installation before release.
+Final local review: 39 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation subsequently completed, `pip check` passed, and all 39 tests passed inside `.venv`. The GitHub workflow additionally builds the Docker image and runs a synthetic HTTP smoke check against the container.
 
 ## Release phase
 
-Deployment and public repository publication are deferred at the user's request. The Dockerfile is prepared, but its image has not been built here because Docker's local engine was unavailable. For a later Railway release, use a persistent volume at `/data`, set `DATABASE_PATH=/data/app.db`, configure `/health`, keep one replica for SQLite, and repeat the full workflow on the public domain. The live link, public GitHub repository and 3–5 minute recording remain submission deliverables.
+The user will handle deployment. The source includes a Dockerfile, Compose setup, Railway configuration and a deployment smoke checker. Use a persistent volume at `/data`, set `DATABASE_PATH=/data/app.db`, keep one replica for SQLite, and follow [DEPLOYMENT.md](DEPLOYMENT.md). Public-domain verification and the 3–5 minute recording must be completed after deployment. Publication and CI results are recorded in the assessment checklist and review.

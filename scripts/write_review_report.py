@@ -2,6 +2,7 @@
 import argparse
 import json
 import platform
+import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from importlib.metadata import version
@@ -13,6 +14,8 @@ if __name__ == "__main__":
     parser.add_argument("--junit", type=Path, default=Path("tmp/final-tests.xml"))
     parser.add_argument("--resume-report", type=Path, default=Path("tmp/resume-verification.json"))
     parser.add_argument("--clean-install", choices=["passed", "blocked_by_download_timeout"], required=True)
+    parser.add_argument("--repository-url", default=None)
+    parser.add_argument("--ci-status", choices=["pending", "passed", "failed"], default="pending")
     args = parser.parse_args()
     suites = ET.parse(args.junit).getroot().iter("testsuite")
     totals = {"tests": 0, "errors": 0, "failures": 0, "skipped": 0, "seconds": 0.0}
@@ -26,7 +29,7 @@ if __name__ == "__main__":
     output = {
         "reviewed_at": datetime.now(timezone.utc).isoformat(),
         "automated_tests": totals,
-        "runtime": {"python": platform.python_version(), "os": platform.system(),
+        "runtime": {"python": platform.python_version(), "os": platform.system(), "isolated_virtualenv": sys.prefix != sys.base_prefix,
                     "dependencies": {name: version(name) for name in ["fastapi", "starlette", "pydantic", "uvicorn", "PyMuPDF", "python-docx", "openai"]}},
         "actual_resume": {key: private["resume_result"][key] for key in safe_keys},
         "actual_resume_http_checkpoints": len(private["checks"]),
@@ -38,8 +41,9 @@ if __name__ == "__main__":
         "live_llm_call_verified": False,
         "external_employer_submission_verified": False,
         "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
-        "deployment": "Deferred at user request",
-        "public_repository": "Deferred to release phase",
+        "deployment": "User will deploy; configuration and synthetic smoke checker included",
+        "public_repository": args.repository_url or "Not published",
+        "github_ci": args.ci_status,
         "recording": "Outline prepared; recording pending release",
         "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report.",
     }

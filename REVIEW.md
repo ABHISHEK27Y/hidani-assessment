@@ -1,6 +1,6 @@
 # Complete local project review — 21 October 2026
 
-The local project now supports resume upload, extraction, experience-aware recommendations, conversational refinement, job details, application tracking and restored history through a redesigned black/purple glass interface. The local API and browser flows were exercised. Deployment and publication remain deferred as requested.
+The local project supports resume upload, extraction, experience-aware recommendations, conversational refinement, job details, application tracking and restored history through a redesigned black/purple glass interface. The local API and browser flows were exercised. The release handoff includes public source publication and deployment files; the user will perform deployment.
 
 The acceptance status for every point in the brief is in **[ASSESSMENT_CHECKLIST.md](ASSESSMENT_CHECKLIST.md)**. The local flow is verified; actual employer auto-submission, live provider access and release deliverables are not represented as complete.
 
@@ -50,7 +50,7 @@ The final match counts and response timing are recorded in the redacted `docs/ve
 
 The machine-readable test summary, redacted actual-resume result and browser dimensions are in `docs/verification.json`. Dataset schema and source-check evidence are in `docs/data-audit.json`.
 
-Final results: **39 automated tests passed, with no failures or skips**, and **15 of 15 actual-resume HTTP checkpoints passed**. JavaScript syntax, Python compilation and Git whitespace checks passed. The actual resume produced 38 initial matches and four matches after React/India refinement; its final upload-and-match request took 521 ms on this machine. This is a single local observation, not a load-test result.
+Final results: **39 automated tests passed, with no failures or skips**, inside the isolated virtual environment, and **15 of 15 actual-resume HTTP checkpoints passed**. The synthetic deployment checker also passed **13/13 checkpoints** against localhost. `pip check`, JavaScript syntax, Python compilation and Git whitespace checks passed. The actual resume produced 38 initial matches and four matches after React/India refinement; its release-check upload-and-match request took 174 ms on this machine. This is a single local observation, not a load-test result. The clean environment reports a dependency-level Starlette/AnyIO deprecation warning; it does not cause a test failure.
 
 ## API review
 
@@ -63,10 +63,19 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 1. **Real employer submission is incomplete.** Assisted mode returns the original form and records candidate confirmation. Simulation mode creates a visibly simulated local receipt. Neither proves that an employer received an application.
 2. **The live LLM path is unverified.** No provider key is configured. Actual function-calling code and fallback behavior are present; mocked checks do not establish account/model availability.
 3. **External source pages could not be verified.** Sample HTTP requests returned 403 and the browser displayed a security-verification screen. The source API worked; the blocker was not bypassed.
-4. **Deployment is deferred.** No public live link, public repository or final recording was produced in this phase. The Dockerfile has not been built against a running Docker engine here.
+4. **Deployment belongs to the user's handoff.** No public live link or final recording has been produced here. Docker, Compose, Railway configuration, a synthetic public-domain checker and step-by-step instructions are included. GitHub CI builds and exercises the Docker image; its recorded status is in `docs/verification.json`.
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
 6. **Parsing is conservative text extraction.** Scanned resumes need OCR or a text-based export. More layouts should be added as regression fixtures when encountered; there is no claim of perfect parsing of every resume.
-7. **A fresh dependency installation is unverified.** An isolated virtual environment was created, but PyPI downloads timed out or reset. Official cached wheels and checksum-verified partial downloads recovered several dependencies, but the complete fresh install did not finish. The successful test suite used the existing Python 3.13.2 environment with the pinned top-level versions. Repeat a fresh install and CI before release.
+7. **The installation blocker was resolved.** After earlier PyPI timeouts, the full installation completed inside an isolated Python 3.13.2 virtual environment. `pip check` and all 39 tests passed there. `constraints.txt` records versions without local wheel paths; Linux/container compatibility is checked in CI.
+
+## Release handoff
+
+- Public source target: https://github.com/ABHISHEK27Y/hidani-assessment
+- Full instructions: `DEPLOYMENT.md`.
+- Windows launcher: `scripts/run.ps1`.
+- Deployment configuration: `Dockerfile`, `compose.yaml`, `railway.json`, `requirements.txt`, `constraints.txt` and `.env.example`.
+- Post-deployment check: `scripts/smoke_test.py`, using synthetic data only.
+- Optional paid provider check: `scripts/check_llm.py`; a configured key is still required.
 
 ![Desktop workspace](docs/screenshots/desktop.jpg)
 

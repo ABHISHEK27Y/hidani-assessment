@@ -56,7 +56,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **Q07 — Done:** API isolation and workspace reset tested. Resume files, contact values, `.env`, local databases and private test output are excluded from Git.
 - [x] **Q08 — Done:** JavaScript syntax and Python compilation checked. Automated test results and environment details are recorded in `docs/verification.json`.
 - [x] **Q09 — Done:** Interactive API documentation renders with a separate nonce-based policy; the main workspace retains its stricter policy.
-- [ ] **Q10 — Fresh install unverified:** PyPI requests timed out/reset before a complete isolated installation finished. The existing environment passed all 39 automated tests. CI is prepared but has not run on GitHub.
+- [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 39 tests passed inside `.venv`. A separate synthetic running-server check passed 13/13 checkpoints. CI status is recorded in `docs/verification.json`.
 
 ## Submission deliverables and timing
 
@@ -64,10 +64,10 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **S02 — Done:** JSON job database and scraper are included.
 - [x] **S03 — Done:** README covers setup, agent architecture, dataflow, APIs, configuration, limitations and verification commands.
 - [x] **S04 — Done:** A 3–5 minute recording outline is prepared in `DEMO.md`.
-- [ ] **S05 — Deferred by request:** Public GitHub repository publication.
-- [ ] **S06 — Deferred by request:** A deployed live link and full public-domain smoke test.
+- [x] **S05 — Done:** Public source repository: https://github.com/ABHISHEK27Y/hidani-assessment. Its JSON catalogue, scraper, documentation and tests are included.
+- [ ] **S06 — User deployment:** Docker, Compose, Railway configuration, deployment instructions and a synthetic smoke checker are supplied. The user will create the live link and run the public-domain check.
 - [ ] **S07 — Pending release:** The actual 3–5 minute screen recording.
 - [ ] **S08 — Pending release:** Final submission of URLs, code/data and recording.
 - [x] **S09 — Deadline recorded:** Assessment received **19 October 2026**; five days later is **24 October 2026**. Submit earlier if possible because no exact cutoff time was provided.
 
-Deployment is deliberately excluded from this morning's work. Before calling the full assessment complete, resolve the external application expectation, configure/test the LLM if required, publish/deploy, and record the live flow.
+The user has taken over deployment. Before calling the full assessment complete, resolve the external application expectation, configure/test the LLM if required, deploy, and record the live flow. See `DEPLOYMENT.md` for the handoff.

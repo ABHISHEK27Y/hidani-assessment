@@ -8,3 +8,10 @@ __pycache__
 data/app.db*
 tmp
 tests
+.env
+dist
+docs
+.github
+*.pdf
+*.docx
+.pytest_run*

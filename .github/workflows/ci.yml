@@ -20,7 +20,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt -c constraints.txt
       - run: python -m pytest -q --basetemp=.pytest_run
       - run: python scripts/audit_dataset.py --output tmp/data-audit.json
       - run: node --check static/app.js
+      - name: Build deployment image
+        run: docker build -t orbit-ci .
+      - name: Start image with persistent storage
+        run: docker run -d --name orbit-ci -p 8000:8000 -v orbit-ci-data:/data -e DATABASE_PATH=/data/app.db orbit-ci
+      - name: Wait for readiness
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8000/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs orbit-ci
+          exit 1
+      - name: Test running deployment
+        run: python scripts/smoke_test.py --base-url http://127.0.0.1:8000
+      - name: Show container diagnostics
+        if: failure()
+        run: docker logs orbit-ci || true
