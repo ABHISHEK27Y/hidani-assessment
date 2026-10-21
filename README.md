@@ -27,13 +27,18 @@ Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. 
 
 | Variable | Default | Purpose |
 |---|---|---|
+| `LLM_PROVIDER` | `gemini` | Select `gemini`, explicit `openai`, or `none` for local commands only |
+| `GEMINI_API_KEY` | unset | Google AI Studio key for Gemini intent interpretation |
+| `GEMINI_MODEL` | `gemini-3.8-flash` | Default Gemini model; has a Google-documented free API tier |
 | `DATABASE_PATH` | `data/app.db` | Persistent profile, conversation and application database |
 | `JOBS_PATH` | `data/jobs.json` | Job snapshot location |
-| `OPENAI_API_KEY` | unset | Enable optional intent interpretation through OpenAI function calling |
-| `OPENAI_MODEL` | `gpt-4o-mini` | Model for ambiguous requests |
+| `OPENAI_API_KEY` | unset | Used only when `LLM_PROVIDER=openai` is explicitly selected |
+| `OPENAI_MODEL` | `gpt-4o-mini` | Model for the explicit OpenAI provider |
 | `APPLICATION_MODE` | `assisted` | Assisted external handoff, or explicit `simulation` for assessment demos |
 
-The local router supports resume-driven matching, remote/on-site filters, multiple skills, countries, entry-level and internship filters, pagination, profile corrections, job details, application initiation and status queries. An optional LLM interprets ambiguous phrasing using a strict function schema. The app continues with the local router if the provider times out or returns invalid arguments. A key was configured locally and a synthetic live call was attempted; OpenAI returned HTTP 429 with `credit_balance_exhausted`. Successful live interpretation remains unverified until account credits are available. Mocked integration and failure-path tests pass. No key is included in the repository.
+The local router supports resume-driven matching, remote/on-site filters, multiple skills, countries, entry-level and internship filters, pagination, profile corrections, job details, application initiation and status queries. **Gemini 3.8 Flash is the default LLM** for ambiguous phrasing, with server-validated function arguments. Both a live synthetic function call and the full HTTP/orchestrator/matching flow passed with Gemini. The app continues with local rules on provider failure or quota exhaustion; it never automatically switches providers. OpenAI remains an explicit optional setting. No key is included in the repository.
+
+Google currently lists free input/output usage for Gemini 3.8 Flash on its [Free tier](https://ai.google.dev/gemini-api/docs/pricing). Use a Free-tier project in [Google AI Studio](https://aistudio.google.com/apikey); quotas and eligibility are account-specific. This app cannot change your project's billing tier. Free-tier conversations may be used to improve Google's products. Resume files are parsed locally, and profile payloads are excluded from model requests; recent conversation text is sent for ambiguous requests, so use fictional data for public demos. See [Google's compatibility documentation](https://ai.google.dev/gemini-api/docs/openai) for the SDK endpoint used.
 
 ## Application behavior
 
@@ -52,7 +57,7 @@ flowchart LR
   Parse --> Profile[Structured profile]
   Profile --> DB[(SQLite)]
   API --> Agent[Orchestrator]
-  Agent -. ambiguous intent .-> LLM[Optional OpenAI function call]
+  Agent -. ambiguous intent .-> LLM[Gemini function call by default]
   Agent --> Match[Matching tool]
   Match --> JSON[(Job JSON snapshot)]
   Agent --> Apply[Application and status tools]
@@ -65,7 +70,7 @@ flowchart LR
 
 - **Parsing:** PyMuPDF extracts PDF text and python-docx preserves paragraph/table order. Section-aware parsing detects role titles, skills, contact, education and projects. Dated work ranges are unioned to prevent double counting; education and project dates are excluded from work duration. Raw files and raw resume text are not stored.
 - **Matching:** Explicit skill filters, role alignment, work duration, seniority, country restrictions and known country timezone offsets constrain results. The ranking explains shared skills and missing experience information. Unknown numeric experience is not invented. A relevance score is not an offer probability.
-- **Orchestration:** `app/agent.py` validates optional model arguments before invoking tools. Clear commands use local rules. The model cannot invent listings or directly modify the database. Resume text and profile payloads are not included in the model request; recent conversation text is used for context.
+- **Orchestration:** `app/agent.py` validates model arguments before invoking tools. Clear commands use local rules. The model cannot invent listings or directly modify the database. The existing OpenAI SDK connects to Google's documented Gemini compatibility endpoint by default. Resume text and profile payloads are not included in the model request; recent conversation text is used for context.
 - **Memory:** Rich message payloads restore profile cards, job results and application records after reload. The server keeps up to 200 messages per workspace and returns the latest 40.
 - **Persistence:** SQLite transactions and a unique `(session_id, job_id)` key prevent duplicates, including simultaneous requests. Started and submitted timestamps are distinct. The browser holds an anonymous UUID; there is no account creation.
 
@@ -115,7 +120,7 @@ The private-resume verifier accepts only localhost URLs, omits contact values fr
 
 See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the project review](REVIEW.md), [the delivery phases](PHASES.md), and [the recording outline](DEMO.md).
 
-Final review: 39 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation completed, `pip check` passed, and all 39 tests passed inside `.venv`. GitHub Actions also passed on Linux/Python 3.12, built the Docker image, started it with a volume and passed the synthetic running-container smoke test. See [CI evidence](docs/ci-verification.json).
+Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation completed and `pip check` passed. Gemini also passed a live synthetic function call and the full HTTP/orchestrator flow; see [provider evidence](docs/llm-verification.json). GitHub Actions builds and smoke-tests the Docker image; the exact tested commit and run are in [CI evidence](docs/ci-verification.json).
 
 ## Release phase
 

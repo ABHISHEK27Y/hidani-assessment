@@ -74,6 +74,7 @@ def test_docx_resume_extraction():
 
 
 def test_llm_tool_call_is_only_an_intent_router(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
     import openai
     from app.agent import _llm_intent
 

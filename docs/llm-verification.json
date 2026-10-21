@@ -1,0 +1,13 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.8-flash",
+  "live_function_call_verified": true,
+  "http_orchestrator_verified": true,
+  "router": "gemini",
+  "tools": [
+    "match_jobs"
+  ],
+  "action": "recommend",
+  "data": "Synthetic profile and prompt only; no private resume/contact values",
+  "employer_submission": false
+}

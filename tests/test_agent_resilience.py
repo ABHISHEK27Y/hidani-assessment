@@ -21,6 +21,7 @@ def test_concurrent_application_requests_create_one_record(tmp_path, monkeypatch
 
 @pytest.mark.parametrize("arguments", ['not JSON', '{"intent":"delete_everything"}', '{"intent":"apply","reference":-3}', '{"intent":"apply","extra":"bad"}'])
 def test_invalid_llm_arguments_are_rejected(monkeypatch, arguments):
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
     import openai
     call = SimpleNamespace(function=SimpleNamespace(name="route_job_request", arguments=arguments))
     response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(tool_calls=[call]))])
@@ -31,6 +32,7 @@ def test_invalid_llm_arguments_are_rejected(monkeypatch, arguments):
 
 
 def test_provider_failure_keeps_local_router_working(tmp_path, monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
     import openai
     monkeypatch.setattr(store, "DB_PATH", tmp_path / "fallback.db")
     store.init_db()

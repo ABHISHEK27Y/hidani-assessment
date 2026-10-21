@@ -36,8 +36,8 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 
 - [x] **R01 — Done:** A conversational assistant, with resume upload in the conversation and subsequent requests handled as messages.
 - [x] **R02 — Done:** An orchestrator with specialized parsing, matching, profile, application and status tools.
-- [x] **R03 — Done:** Optional OpenAI function calling uses a strict schema and validates arguments before tool dispatch. Invalid arguments and provider failure fall back safely.
-- [ ] **R04 — Live provider blocked by account balance:** A key is configured only in the ignored local `.env`. A synthetic live request returned HTTP 429, `credit_balance_exhausted`. Mocked tool-call and failure-path tests pass; successful live function calling requires available API credits and a rerun of `scripts/check_llm.py`.
+- [x] **R03 — Done:** Gemini is the default function-calling provider. Arguments are validated with the server's schema before dispatch. An explicit OpenAI option retains its strict schema. Invalid arguments, provider failure and Gemini quota exhaustion fall back to local rules without switching providers.
+- [x] **R04 — Done:** Gemini 3.8 Flash passed both a live synthetic function call and the complete HTTP chat/orchestrator/matching flow. Keys are stored only in ignored local configuration. Redacted evidence is in `docs/llm-verification.json`.
 - [x] **R05 — Done:** Conversation memory and rich results survive reload through SQLite-backed history.
 - [x] **R06 — Done:** Applications store job ID, initiation/submission dates and status. Duplicate protection is enforced by a unique database key, including simultaneous requests.
 - [x] **R07 — Done:** Unreadable, empty, scanned, password-protected, unsupported and oversized resume errors are handled clearly.
@@ -56,7 +56,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **Q07 — Done:** API isolation and workspace reset tested. Resume files, contact values, `.env`, local databases and private test output are excluded from Git.
 - [x] **Q08 — Done:** JavaScript syntax and Python compilation checked. Automated test results and environment details are recorded in `docs/verification.json`.
 - [x] **Q09 — Done:** Interactive API documentation renders with a separate nonce-based policy; the main workspace retains its stricter policy.
-- [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 39 tests passed inside `.venv`. A separate synthetic running-server check passed 13/13 checkpoints. GitHub Actions passed Linux installation, tests, Docker build and the running-container smoke check; evidence is in `docs/ci-verification.json`.
+- [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 45 tests passed inside `.venv`, including Gemini routing and provider-isolation regressions. A separate synthetic running-server check passed 13/13 checkpoints. The exact GitHub Actions run and source commit are in `docs/ci-verification.json`.
 
 ## Submission deliverables and timing
 
@@ -70,4 +70,4 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [ ] **S08 — Pending release:** Final submission of URLs, code/data and recording.
 - [x] **S09 — Deadline recorded:** Assessment received **19 October 2026**; five days later is **24 October 2026**. Submit earlier if possible because no exact cutoff time was provided.
 
-The user has taken over deployment. Before calling the full assessment complete, resolve the external application expectation, configure/test the LLM if required, deploy, and record the live flow. See `DEPLOYMENT.md` for the handoff.
+The user has taken over deployment. Before calling the full assessment complete, resolve the external application expectation, configure the Gemini key on the host, deploy, and record the live flow. See `DEPLOYMENT.md` for the handoff.

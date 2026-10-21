@@ -91,6 +91,7 @@ async def lifespan(_app):
     store.init_db()
     jobs.catalogue()
     agent.application_mode()
+    agent.llm_status()
     yield
 
 
@@ -162,7 +163,7 @@ def health():
         db.execute("SELECT 1").fetchone()
     records = jobs.catalogue()
     return {"ok": True, "jobs": len(records), "active_jobs": sum(jobs.is_active(job) for job in records),
-            "llm_configured": bool(os.getenv("OPENAI_API_KEY")), "application_mode": agent.application_mode()}
+            **agent.llm_status(), "application_mode": agent.application_mode()}
 
 
 @app.get("/api/bootstrap")
@@ -173,7 +174,7 @@ def bootstrap(session_id: UUID):
     return {"profile": state["profile"], "filters": state["filters"],
             "applications": agent.enriched_applications(sid), "job_count": len(active),
             "dataset_count": len(jobs.catalogue()), "history": store.history(sid),
-            "application_mode": agent.application_mode(), "llm_configured": bool(os.getenv("OPENAI_API_KEY"))}
+            "application_mode": agent.application_mode(), **agent.llm_status()}
 
 
 @app.get("/api/jobs/{job_id}")

@@ -32,17 +32,18 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log
 
 Copy the example only when `.env` does not already contain your configuration.
 
-## Optional OpenAI configuration
+## Gemini free-tier configuration (default)
 
-Local parsing, recommendations, supported chat commands and tracking work without a provider key. Ambiguous phrasing can use OpenAI function calling when a key is configured.
+Local parsing, recommendations, supported chat commands and tracking work without a provider key. Ambiguous phrasing uses Gemini function calling when its key is configured.
 
-1. Open [OpenAI API keys](https://platform.openai.com/api-keys), sign in, select your project and create a secret key.
-2. Check your account's API billing/available test credits. Ongoing API usage is priced separately from ChatGPT subscription usage; do not assume a subscription supplies API credit.
+1. Open [Google AI Studio API keys](https://aistudio.google.com/apikey), sign in and create a key in your project.
+2. Confirm the project is on Google's **Free tier**. Gemini 3.8 Flash currently has free input/output usage on that tier, subject to your project's active limits. A key is associated with a project; the model is selected by the app. Do not enable paid billing if your intention is to stay on the free tier.
 3. Edit the ignored `.env` locally:
 
 ```dotenv
-OPENAI_API_KEY=replace_with_your_actual_key
-OPENAI_MODEL=gpt-4o-mini
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=replace_with_your_actual_key
+GEMINI_MODEL=gemini-3.8-flash
 DATABASE_PATH=data/app.db
 JOBS_PATH=data/jobs.json
 APPLICATION_MODE=assisted
@@ -54,9 +55,13 @@ APPLICATION_MODE=assisted
 .\.venv\Scripts\python.exe scripts/check_llm.py
 ```
 
-This command may incur provider usage charges. It sends a synthetic search request, not your resume. Restart the server after changing `.env`. Keep secrets out of screenshots, chat messages, Git and browser-side JavaScript.
+This command sends a synthetic search request, not your resume. Usage follows the billing tier of your Google project; the app cannot force a paid project onto the free tier. Restart the server after changing `.env`. Keep secrets out of screenshots, chat messages, Git and browser-side JavaScript. Gemini quota errors fall back to local rules without switching to another provider.
 
-References: [OpenAI quickstart](https://developers.openai.com/api/docs/quickstart), [API pricing](https://developers.openai.com/api/docs/pricing), [ChatGPT subscription pricing](https://learn.chatgpt.com/docs/pricing).
+Google's free-tier terms allow submitted content to be used to improve products. Raw resume files and profile payloads are not sent to Gemini, but recent conversation text is sent for ambiguous requests. Use fictional data in public demos. References: [Gemini keys](https://ai.google.dev/gemini-api/docs/api-key), [pricing](https://ai.google.dev/gemini-api/docs/pricing), [active rate limits](https://ai.google.dev/gemini-api/docs/rate-limits).
+
+### Optional providers
+
+Set `LLM_PROVIDER=none` to disable all model requests even when keys are present. OpenAI is available only by explicitly setting `LLM_PROVIDER=openai` with `OPENAI_API_KEY` and `OPENAI_MODEL`. Its [API pricing](https://developers.openai.com/api/docs/pricing) is separate from ChatGPT subscription usage. There is no automatic paid-provider fallback.
 
 ## Docker Compose
 
@@ -80,8 +85,9 @@ Open **http://127.0.0.1:8000**. The named `orbit-data` volume preserves SQLite d
 |---|---|
 | `DATABASE_PATH` | `/data/app.db` |
 | `APPLICATION_MODE` | `assisted` |
-| `OPENAI_API_KEY` | Your key, if you want live model interpretation |
-| `OPENAI_MODEL` | `gpt-4o-mini`, or an available compatible model |
+| `LLM_PROVIDER` | `gemini` |
+| `GEMINI_API_KEY` | Your Google AI Studio key |
+| `GEMINI_MODEL` | `gemini-3.8-flash` |
 
 The catalogue is bundled in the image. Leave `JOBS_PATH` unset. Railway injects `PORT`, which the container start command reads automatically. Keep **one replica** for this SQLite deployment.
 
@@ -114,7 +120,7 @@ Greenhouse/Lever submission integrations require the employer's authorized crede
 | Installation times out | Retry on a stable connection. Preserve `requirements.txt` and `constraints.txt`; do not replace versions randomly. |
 | Server says address is in use | Choose another `-Port` locally, or stop the previous app process. |
 | Railway history disappears | Verify the `/data` volume and `DATABASE_PATH=/data/app.db`, then redeploy. |
-| Model calls fall back to rules | Run `scripts/check_llm.py`; check key, billing, model access and connectivity. |
+| Model calls fall back to rules | Run `scripts/check_llm.py`; check the selected provider key, free-tier quota, model access and connectivity. |
 | Upload says scanned/unreadable | Export a text-based PDF or DOCX; OCR is not included. |
 | External application page shows verification/login | Complete the source site's normal flow. Orbit does not bypass it. |
 

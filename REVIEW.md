@@ -2,7 +2,7 @@
 
 The local project supports resume upload, extraction, experience-aware recommendations, conversational refinement, job details, application tracking and restored history through a redesigned black/purple glass interface. The local API and browser flows were exercised. The release handoff includes public source publication and deployment files; the user will perform deployment.
 
-The acceptance status for every point in the brief is in **[ASSESSMENT_CHECKLIST.md](ASSESSMENT_CHECKLIST.md)**. The local flow is verified; actual employer auto-submission, live provider access and release deliverables are not represented as complete.
+The acceptance status for every point in the brief is in **[ASSESSMENT_CHECKLIST.md](ASSESSMENT_CHECKLIST.md)**. The local flow and live Gemini tool routing are verified. Actual employer auto-submission, a public live deployment and the final recording remain incomplete.
 
 ## Resume test
 
@@ -50,7 +50,7 @@ The final match counts and response timing are recorded in the redacted `docs/ve
 
 The machine-readable test summary, redacted actual-resume result and browser dimensions are in `docs/verification.json`. Dataset schema and source-check evidence are in `docs/data-audit.json`.
 
-Final results: **39 automated tests passed, with no failures or skips**, inside the isolated virtual environment, and **15 of 15 actual-resume HTTP checkpoints passed**. The synthetic deployment checker also passed **13/13 checkpoints** against localhost. `pip check`, JavaScript syntax, Python compilation and Git whitespace checks passed. The actual resume produced 38 initial matches and four matches after React/India refinement; its release-check upload-and-match request took 174 ms on this machine. This is a single local observation, not a load-test result. The clean environment reports a dependency-level Starlette/AnyIO deprecation warning; it does not cause a test failure.
+Final results: **45 automated tests passed, with no failures or skips**, inside the isolated virtual environment, and **15 of 15 actual-resume HTTP checkpoints passed**. The synthetic deployment checker also passed **13/13 checkpoints** against localhost. `pip check`, JavaScript syntax, Python compilation and Git whitespace checks passed. The actual resume produced 38 initial matches and four matches after React/India refinement; its release-check upload-and-match request took 174 ms on this machine. This is a single local observation, not a load-test result. The clean environment reports a dependency-level Starlette/AnyIO deprecation warning; it does not cause a test failure.
 
 ## API review
 
@@ -61,12 +61,12 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 ## Remaining limits and release work
 
 1. **Real employer submission is incomplete.** Assisted mode returns the original form and records candidate confirmation. Simulation mode creates a visibly simulated local receipt. Neither proves that an employer received an application.
-2. **The live LLM path is blocked by API balance.** A supplied key was saved only in the ignored local `.env`. A synthetic provider request returned HTTP 429 with code `credit_balance_exhausted`. Successful live function calling remains unverified until account credits are available and the check is rerun. Mocked integration and fallback tests pass; the key is excluded from source and reports.
+2. **The earlier provider blocker was resolved by switching to Gemini.** OpenAI returned HTTP 429 with code `credit_balance_exhausted`. Gemini 3.8 Flash is now the default and passed both a live synthetic function call and the full HTTP/orchestrator/matching flow. Its documented Free tier is quota-limited and follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json`.
 3. **External source pages could not be verified.** Sample HTTP requests returned 403 and the browser displayed a security-verification screen. The source API worked; the blocker was not bypassed.
 4. **Deployment belongs to the user's handoff.** No public live link or final recording has been produced here. Docker, Compose, Railway configuration, a synthetic public-domain checker and step-by-step instructions are included. GitHub CI builds and exercises the Docker image; its recorded status is in `docs/verification.json`.
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
 6. **Parsing is conservative text extraction.** Scanned resumes need OCR or a text-based export. More layouts should be added as regression fixtures when encountered; there is no claim of perfect parsing of every resume.
-7. **The installation blocker was resolved.** After earlier PyPI timeouts, the full installation completed inside an isolated Python 3.13.2 virtual environment. `pip check` and all 39 tests passed there. `constraints.txt` records versions without local wheel paths; Linux/container compatibility is checked in CI.
+7. **The installation blocker was resolved.** After earlier PyPI timeouts, the full installation completed inside an isolated Python 3.13.2 virtual environment. `pip check` and all 45 tests passed there. `constraints.txt` records versions without local wheel paths; Linux/container compatibility is checked in CI.
 
 ## Release handoff
 
@@ -75,7 +75,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 - Windows launcher: `scripts/run.ps1`.
 - Deployment configuration: `Dockerfile`, `compose.yaml`, `railway.json`, `requirements.txt`, `constraints.txt` and `.env.example`.
 - Post-deployment check: `scripts/smoke_test.py`, using synthetic data only.
-- Optional paid provider check: `scripts/check_llm.py`; a configured key is still required.
+- Live Gemini check: `scripts/check_llm.py`; configure a Free-tier Google AI Studio key in local/hosting environment variables. It sends only a synthetic search request.
 - GitHub Actions passed Linux installation, automated tests, the Docker build and the running-container HTTP smoke check. Exact tested commit and run URL are in `docs/ci-verification.json`.
 
 ![Desktop workspace](docs/screenshots/desktop.jpg)

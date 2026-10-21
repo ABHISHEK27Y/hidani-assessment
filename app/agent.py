@@ -14,6 +14,24 @@ from app.skills import extract_skills
 
 logger = logging.getLogger(__name__)
 
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+
+def _llm_settings():
+    provider = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
+    if provider not in {"gemini", "openai", "none"}:
+        raise ValueError("LLM_PROVIDER must be gemini, openai or none")
+    if provider == "gemini":
+        return provider, os.getenv("GEMINI_MODEL", "gemini-3.8-flash"), os.getenv("GEMINI_API_KEY", "")
+    if provider == "openai":
+        return provider, os.getenv("OPENAI_MODEL", "gpt-4o-mini"), os.getenv("OPENAI_API_KEY", "")
+    return provider, None, ""
+
+
+def llm_status():
+    provider, model, key = _llm_settings()
+    return {"llm_provider": provider, "llm_model": model, "llm_configured": bool(key.strip())}
+
 
 class Intent(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -45,23 +63,29 @@ def application_mode():
 
 
 def _llm_intent(message: str, conversation: list[dict]) -> dict | None:
-    if not os.getenv("OPENAI_API_KEY"):
+    provider, model, key = _llm_settings()
+    if not key.strip():
         return None
     try:
         from openai import OpenAI
         schema = Intent.model_json_schema()
-        schema["required"] = list(schema["properties"])
+        schema["required"] = list(schema["properties"]) if provider == "openai" else ["intent"]
         for value in schema["properties"].values():
             value.pop("default", None)
         tool = {"type": "function", "function": {
-            "name": "route_job_request", "strict": True,
+            "name": "route_job_request",
             "description": "Interpret a job-search request. The server validates and executes tools; this function cannot submit to employers.",
             "parameters": schema,
         }}
+        if provider == "openai":
+            tool["function"]["strict"] = True
         recent = [{"role": item["role"], "content": item["content"]} for item in conversation[-6:]]
-        response = OpenAI(timeout=10, max_retries=0).chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"), temperature=0,
-            tools=[tool], parallel_tool_calls=False,
+        client_options = {"api_key": key, "timeout": 15, "max_retries": 0,
+                          "base_url": GEMINI_BASE_URL if provider == "gemini" else "https://api.openai.com/v1/"}
+        generation = ({"reasoning_effort": "low", "max_tokens": 2048} if provider == "gemini"
+                      else {"temperature": 0, "parallel_tool_calls": False})
+        response = OpenAI(**client_options).chat.completions.create(
+            model=model, tools=[tool], **generation,
             tool_choice={"type": "function", "function": {"name": "route_job_request"}},
             messages=[{"role": "system", "content": (
                 "Interpret the user's latest request using route_job_request. Use one-based references only from the latest numbered results. "
@@ -172,7 +196,7 @@ def respond(session_id: str, message: str, job_id: str | None = None) -> dict:
     if ambiguous or (intent["intent"] in {"apply", "confirm", "details"} and intent["reference"] is None and not job_id):
         interpreted = _llm_intent(message, store.history(session_id))
         if interpreted:
-            intent, router = interpreted, "openai"
+            intent, router = interpreted, _llm_settings()[0]
     result = {"reply": "", "jobs": [], "profile": None, "action": intent["intent"], "router": router,
               "application_mode": application_mode(), "tools": []}
     kind = intent["intent"]

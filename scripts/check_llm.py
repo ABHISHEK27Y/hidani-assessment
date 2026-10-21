@@ -7,15 +7,16 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[1] / '.env', override=False)
 
-from app.agent import _llm_intent
-import os
+from app.agent import _llm_intent, llm_status
 
 if __name__ == '__main__':
-    if not os.getenv('OPENAI_API_KEY'):
-        raise SystemExit('No OPENAI_API_KEY configured. Add it to .env, then rerun. No provider request was made.')
+    status = llm_status()
+    if not status['llm_configured']:
+        variable = 'GEMINI_API_KEY' if status['llm_provider'] == 'gemini' else 'OPENAI_API_KEY'
+        raise SystemExit(f'Provider {status["llm_provider"]} is not configured. Set {variable} in .env, then rerun. No provider request was made.')
     result = _llm_intent('Find early-career React roles available in India.', [])
     if not result:
-        raise SystemExit('Live tool call did not validate. Check provider billing, model access, key permissions and connectivity. No application was sent.')
+        raise SystemExit('Live tool call did not validate. Check the selected provider key, quota, model access and connectivity. No application was sent.')
     if result['intent'] != 'recommend' or not ('React' in result['skills'] or result.get('skill') == 'React'):
         raise SystemExit('Provider returned valid arguments but missed the requested React search. Review the routing prompt before release.')
-    print(f"Live function call passed: intent={result['intent']}; model={os.getenv('OPENAI_MODEL', 'gpt-4o-mini')}. No personal resume data was sent.")
+    print(f"Live function call passed: provider={status['llm_provider']}; intent={result['intent']}; model={status['llm_model']}. No personal resume data was sent.")

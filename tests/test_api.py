@@ -20,6 +20,8 @@ def resume_pdf():
 def client(tmp_path, monkeypatch):
     monkeypatch.setattr(store, "DB_PATH", tmp_path / "api.db")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setenv("LLM_PROVIDER", "gemini")
     monkeypatch.setenv("APPLICATION_MODE", "assisted")
     limiter.events.clear()
     with TestClient(app) as test_client:
@@ -47,6 +49,15 @@ def test_page_assets_and_readiness(client):
     health = client.get("/health").json()
     assert health["ok"] and health["jobs"] == 1800
     assert not health["llm_configured"]
+
+
+def test_health_reports_selected_provider_without_exposing_key(client, monkeypatch):
+    monkeypatch.setenv('GEMINI_API_KEY', 'synthetic-health-key')
+    response = client.get('/health')
+    assert response.json()['llm_provider'] == 'gemini'
+    assert response.json()['llm_model'] == 'gemini-3.8-flash'
+    assert response.json()['llm_configured']
+    assert 'synthetic-health-key' not in response.text
 
 
 def test_api_docs_policy_allows_initializer_without_weakening_workspace(client):
