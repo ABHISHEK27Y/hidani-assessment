@@ -49,7 +49,7 @@
   "llm_model": "gemini-3.5-flash-lite",
   "external_employer_submission_verified": false,
   "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
-  "deployment": "Live on Render at https://orbit-assessment-r2j9.onrender.com; 13 public smoke checkpoints passed; hosted Gemini routing pending",
+  "deployment": "Live on Render at https://orbit-assessment-r2j9.onrender.com; 13 public smoke checkpoints passed; hosted Gemini routing passed",
   "public_repository": "https://github.com/ABHISHEK27Y/hidani-assessment",
   "github_ci": "passed",
   "recording": "Five-minute script prepared in DEMO.md; recording pending release",

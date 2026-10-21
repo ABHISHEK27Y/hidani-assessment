@@ -38,9 +38,9 @@
   "screen_recording": "not_recorded_script_in_DEMO.md",
   "note": "The public Render HTTP checks used a fictional profile. Reports exclude resume contact values and credentials.",
   "github_ci": {
-    "head_sha": "cb2895ad58997aa19643105eddce3a7a0822ede7",
+    "head_sha": "dd70923cc351a2ef6f380fb6005278e1f41ffca2",
     "conclusion": "success",
-    "html_url": "https://github.com/ABHISHEK27Y/hidani-assessment/actions/runs/39614607536"
+    "html_url": "https://github.com/ABHISHEK27Y/hidani-assessment/actions/runs/39618278485"
   },
   "browser_recheck": {
     "resume_upload": true,
@@ -55,9 +55,10 @@
     "blueprint": "render.yaml",
     "free_web_and_postgres": true,
     "public_url": "https://orbit-assessment-r2j9.onrender.com",
-    "public_http_tests": "13_of_13_passed_2026-10-21",
-    "hosted_gemini_routing": "incorrect_provider_key_in_render_pending_correction",
+    "public_http_tests": "13_of_13_passed_on_current_release_2026-10-21",
+    "hosted_gemini_routing": "passed_http_200_router_gemini_action_recommend_synthetic_request_2026-10-21",
     "hosted_persistence_test": "passed_across_successful_web_redeployment_2026-10-21",
-    "postgres_container_smoke": "passed_in_github_ci"
+    "postgres_container_smoke": "passed_in_github_ci",
+    "auto_deploy_from_main": "verified_e427dfd_and_dd70923"
   }
 }

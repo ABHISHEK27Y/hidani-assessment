@@ -9,7 +9,11 @@
   ],
   "action": "recommend",
   "data": "Synthetic prompt only; no private resume/contact values",
-  "scope": "local function call and local HTTP orchestrator; hosted check pending",
+  "scope": "live synthetic function call, local HTTP orchestrator, and hosted Render HTTP orchestrator",
   "previous_verified_model": "gemini-3.8-flash",
-  "employer_submission": false
+  "employer_submission": false,
+  "hosted_http_status": 200,
+  "hosted_router": "gemini",
+  "hosted_action": "recommend",
+  "hosted_session_cleanup_http_status": 200
 }

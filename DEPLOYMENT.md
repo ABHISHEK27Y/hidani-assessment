@@ -34,9 +34,11 @@ Copy the example only when `.env` does not already contain your configuration.
 
 ## Render: free assessment deployment
 
-The assessment app is live at https://orbit-assessment-r2j9.onrender.com. The public readiness endpoint and all 13 synthetic smoke checkpoints passed on 21 October 2026. A fictional application survived a web-service redeployment and was removed afterward. Hosted Gemini routing is still being verified after correcting its Render secret.
+The assessment app is live at https://orbit-assessment-r2j9.onrender.com. The public readiness endpoint, all 13 synthetic smoke checkpoints, and a synthetic Gemini-routed request passed on 21 October 2026. A fictional application survived a web-service redeployment and was removed afterward. Render's Auto-Deploy has also successfully deployed pushes to `main`.
 
 The included `render.yaml` defines two resources: a free Docker web service and a free PostgreSQL database. `DATABASE_URL` is filled from the database's internal connection string, so application history is kept outside the web container. The Gemini key is prompted as a secret during Blueprint creation; it is never stored in Git.
+
+For code updates, leave **Auto-Deploy** enabled on the web service's **Settings** page. A push to GitHub `main` starts a web-service deployment automatically; the successful Auto-Deploy entries in the Render Deploys tab confirm it is already enabled here. Changes to `render.yaml` also sync automatically when the Blueprint's **Settings → Auto Sync** is set to **Yes**, which is Render's default. **Manual Sync** is needed only if Auto Sync was turned off or you want to force another sync.
 
 1. Use the [Deploy to Render shortcut](https://render.com/deploy?repo=https://github.com/ABHISHEK27Y/hidani-assessment), or select **New → Blueprint** in the Render Dashboard and connect `ABHISHEK27Y/hidani-assessment` on `main`. Render reads `render.yaml`.
 2. Review the resource list and confirm that **both** the web service and Postgres show the **Free** plan. Enter the Gemini key only in the secret prompt. Do not enable a paid plan or add a persistent disk.

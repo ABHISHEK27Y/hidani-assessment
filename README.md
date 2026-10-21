@@ -127,4 +127,4 @@ Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. T
 
 ## Release phase
 
-The [live Render app](https://orbit-assessment-r2j9.onrender.com) uses a free Docker web service and free PostgreSQL database. Its public `/health` endpoint and all 13 synthetic HTTP smoke checkpoints passed on 21 October. A fictional resume and application survived a web-service redeployment. Hosted Gemini routing remains under review because the deployment initially received an incorrect provider key. The actual 3–5 minute recording remains pending. See [release evidence](docs/final-release-check.json).
+The [live Render app](https://orbit-assessment-r2j9.onrender.com) uses a free Docker web service and free PostgreSQL database. Its public `/health` endpoint, all 13 synthetic HTTP smoke checkpoints, and a synthetic Gemini function-routed request passed on 21 October. A fictional resume and application survived a web-service redeployment. The actual 3–5 minute recording remains pending. See [release evidence](docs/final-release-check.json).

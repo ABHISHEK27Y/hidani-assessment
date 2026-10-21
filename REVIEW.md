@@ -1,8 +1,8 @@
 # Final assessment report — 21 October 2026
 
-The project supports resume upload, extraction, experience-aware recommendations, conversational refinement, job details, application tracking and restored history through a black/purple glass interface. The final local API, actual-resume and browser checks passed. Deployment was attempted on Railway, but its platform outage blocked project creation.
+The project supports resume upload, extraction, experience-aware recommendations, conversational refinement, job details, application tracking and restored history through a black/purple glass interface. The local API, actual-resume and browser checks passed. Railway project creation was blocked by a platform outage, so the app was deployed on Render.
 
-The acceptance status for every point in the brief is in **[ASSESSMENT_CHECKLIST.md](ASSESSMENT_CHECKLIST.md)**. The local flow and live Gemini tool routing are verified. Actual employer auto-submission, a public live deployment and the final recording remain incomplete.
+The acceptance status for every point in the brief is in **[ASSESSMENT_CHECKLIST.md](ASSESSMENT_CHECKLIST.md)**. The public deployment and hosted Gemini tool routing are verified. Actual employer auto-submission and the final recording remain incomplete.
 
 ## Final checkpoint summary
 
@@ -13,17 +13,17 @@ The acceptance status for every point in the brief is in **[ASSESSMENT_CHECKLIST
 | Role, skills and experience matching with reasons | Done |
 | Natural chat refinement and conversation memory | Done |
 | Orchestrator with parsing, matching and application tools | Done |
-| Gemini function calling and provider-error fallback | Done; earlier live evidence retained |
+| Gemini function calling and provider-error fallback | Done locally and on the public deployment |
 | Application record, date, status and duplicate prevention | Done for the assisted workflow |
 | Automatic submission to an external employer | Incomplete; requires an authorized employer integration |
 | Bad file, no matches and invalid job number handling | Done |
 | No login requirement | Done |
 | Public source, README, dataset and scraper | Done: ABHISHEK27Y/hidani-assessment |
-| Railway deployment and public end-to-end check | Blocked by Railway's platform outage |
+| Public deployment and end-to-end check | Done on Render; 13/13 HTTP checks and hosted Gemini routing passed |
 | Five-minute video script | Done: DEMO.md |
 | Actual screen recording and final submission | Pending |
 
-This is not a claim that every assessment requirement is complete. In particular, the brief's “assistant applies” requirement remains only partially implemented, and the live-link requirement is blocked. Local test success cannot establish a working public deployment.
+This is not a claim that every assessment requirement is complete. In particular, the brief's “assistant applies” requirement remains only partially implemented. The live link is working and was checked separately from local tests.
 
 ## Resume test
 
@@ -82,9 +82,9 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 ## Remaining limits and release work
 
 1. **Real employer submission is incomplete.** Assisted mode returns the original form and records candidate confirmation. Simulation mode creates a visibly simulated local receipt. Neither proves that an employer received an application.
-2. **Gemini is verified locally and quota-limited.** Default Gemini 3.5 Flash-Lite passed a live synthetic function call and the full local HTTP/orchestrator flow. Its hosted check is still pending. The Free tier follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json`.
+2. **Gemini is verified locally and on Render.** Default Gemini 3.5 Flash-Lite passed a live synthetic function call, the local HTTP/orchestrator flow, and a hosted request that returned `router: gemini`. The Free tier follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json`.
 3. **External source pages could not be verified.** Sample HTTP requests returned 403 and the browser displayed a security-verification screen. The source API worked; the blocker was not bypassed.
-4. **The app is live on Render.** Railway rejected project creation during its outage, so the free Render Blueprint was used. The [public web service](https://orbit-assessment-r2j9.onrender.com) and free PostgreSQL database were created successfully. The public readiness check and all 13 synthetic HTTP smoke checkpoints passed. A fictional application survived a web-service redeployment and was then removed. Hosted Gemini routing still fell back to local rules because the deployment initially received an incorrect provider key; correcting and retesting that secret is the remaining service check.
+4. **The app is live on Render.** Railway rejected project creation during its outage, so the free Render Blueprint was used. The [public web service](https://orbit-assessment-r2j9.onrender.com) and free PostgreSQL database were created successfully. The public readiness check and all 13 synthetic HTTP smoke checkpoints passed. A fictional application survived a web-service redeployment and was then removed. After correcting the provider secret, a hosted synthetic request returned HTTP 200 with Gemini routing. Auto-Deploy from `main` also succeeded.
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
 6. **Parsing is conservative text extraction.** Scanned resumes need OCR or a text-based export. More layouts should be added as regression fixtures when encountered; there is no claim of perfect parsing of every resume.
 7. **Installation is reproducible.** The isolated Python environment passed dependency checks and all tests. `constraints.txt` records package versions without local wheel paths; Linux/container compatibility is checked in CI.
@@ -100,8 +100,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 
 ## Remaining release sequence
 
-1. Recheck the Gemini secret in Render and confirm that a synthetic ambiguous request reports `router: gemini` on the hosted app.
-2. Record the five-minute walkthrough and submit the [live URL](https://orbit-assessment-r2j9.onrender.com), repository URL and recording. Resolve or explicitly disclose the external-application gap.
+1. Record the five-minute walkthrough and submit the [live URL](https://orbit-assessment-r2j9.onrender.com), repository URL and recording. Resolve or explicitly disclose the external-application gap.
 
 ## Release handoff
 
