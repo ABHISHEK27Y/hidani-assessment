@@ -76,6 +76,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 - Deployment configuration: `Dockerfile`, `compose.yaml`, `railway.json`, `requirements.txt`, `constraints.txt` and `.env.example`.
 - Post-deployment check: `scripts/smoke_test.py`, using synthetic data only.
 - Optional paid provider check: `scripts/check_llm.py`; a configured key is still required.
+- GitHub Actions passed Linux installation, automated tests, the Docker build and the running-container HTTP smoke check. Exact tested commit and run URL are in `docs/ci-verification.json`.
 
 ![Desktop workspace](docs/screenshots/desktop.jpg)
 

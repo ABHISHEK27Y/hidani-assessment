@@ -56,7 +56,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **Q07 — Done:** API isolation and workspace reset tested. Resume files, contact values, `.env`, local databases and private test output are excluded from Git.
 - [x] **Q08 — Done:** JavaScript syntax and Python compilation checked. Automated test results and environment details are recorded in `docs/verification.json`.
 - [x] **Q09 — Done:** Interactive API documentation renders with a separate nonce-based policy; the main workspace retains its stricter policy.
-- [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 39 tests passed inside `.venv`. A separate synthetic running-server check passed 13/13 checkpoints. CI status is recorded in `docs/verification.json`.
+- [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 39 tests passed inside `.venv`. A separate synthetic running-server check passed 13/13 checkpoints. GitHub Actions passed Linux installation, tests, Docker build and the running-container smoke check; evidence is in `docs/ci-verification.json`.
 
 ## Submission deliverables and timing
 

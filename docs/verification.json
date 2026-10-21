@@ -1,5 +1,5 @@
 {
-  "reviewed_at": "2026-10-21T11:26:57.722594+00:00",
+  "reviewed_at": "2026-10-21T11:30:29.405785+00:00",
   "automated_tests": {
     "tests": 39,
     "errors": 0,
@@ -48,7 +48,7 @@
   "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
   "deployment": "User will deploy; configuration and synthetic smoke checker included",
   "public_repository": "https://github.com/ABHISHEK27Y/hidani-assessment",
-  "github_ci": "pending",
+  "github_ci": "passed",
   "recording": "Outline prepared; recording pending release",
   "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report."
 }

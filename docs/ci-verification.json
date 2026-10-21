@@ -1,0 +1,42 @@
+{
+  "id": 39592150719,
+  "head_sha": "cca7163df186c0b854e5f632a973159b48892dc3",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/ABHISHEK27Y/hidani-assessment/actions/runs/39592150719",
+  "runner": "ubuntu-latest / Python 3.12",
+  "checks": [
+    {
+      "name": "Run python -m pip install -r requirements-dev.txt -c constraints.txt",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python -m pytest -q --basetemp=.pytest_run",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python scripts/audit_dataset.py --output tmp/data-audit.json",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run node --check static/app.js",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build deployment image",
+      "conclusion": "success"
+    },
+    {
+      "name": "Start image with persistent storage",
+      "conclusion": "success"
+    },
+    {
+      "name": "Wait for readiness",
+      "conclusion": "success"
+    },
+    {
+      "name": "Test running deployment",
+      "conclusion": "success"
+    }
+  ]
+}

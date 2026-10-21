@@ -1,5 +1,9 @@
 # Orbit — a conversational job search workspace
 
+[![Verify project](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml)
+
+[Public repository](https://github.com/ABHISHEK27Y/hidani-assessment) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assessment/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
+
 Orbit reads a resume, explains relevant jobs, refines results through conversation, and keeps application progress in one workspace. It is built for the Hidani Tech SDE Intern assessment with Python/FastAPI, browser JavaScript, a 1,800-job JSON snapshot, and SQLite. The interface uses black glass panels and muted purple accents, with desktop, tablet and phone layouts.
 
 ![Orbit desktop workspace](docs/screenshots/desktop.jpg)
@@ -111,7 +115,7 @@ The private-resume verifier accepts only localhost URLs, omits contact values fr
 
 See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the project review](REVIEW.md), [the delivery phases](PHASES.md), and [the recording outline](DEMO.md).
 
-Final local review: 39 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation subsequently completed, `pip check` passed, and all 39 tests passed inside `.venv`. The GitHub workflow additionally builds the Docker image and runs a synthetic HTTP smoke check against the container.
+Final review: 39 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation completed, `pip check` passed, and all 39 tests passed inside `.venv`. GitHub Actions also passed on Linux/Python 3.12, built the Docker image, started it with a volume and passed the synthetic running-container smoke test. See [CI evidence](docs/ci-verification.json).
 
 ## Release phase
 
