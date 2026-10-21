@@ -16,6 +16,7 @@ if __name__ == "__main__":
     parser.add_argument("--clean-install", choices=["passed", "blocked_by_download_timeout"], required=True)
     parser.add_argument("--repository-url", default=None)
     parser.add_argument("--ci-status", choices=["pending", "passed", "failed"], default="pending")
+    parser.add_argument("--deployment-status", default="Not deployed; public verification pending")
     parser.add_argument("--llm-report", type=Path, default=Path("docs/llm-verification.json"))
     args = parser.parse_args()
     suites = ET.parse(args.junit).getroot().iter("testsuite")
@@ -46,12 +47,12 @@ if __name__ == "__main__":
         "llm_model": llm.get("model", "gemini-3.8-flash"),
         "external_employer_submission_verified": False,
         "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
-        "deployment": "User will deploy; configuration and synthetic smoke checker included",
+        "deployment": args.deployment_status,
         "public_repository": args.repository_url or "Not published",
         "github_ci": args.ci_status,
-        "recording": "Outline prepared; recording pending release",
+        "recording": "Five-minute script prepared in DEMO.md; recording pending release",
         "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report.",
     }
     Path("docs").mkdir(exist_ok=True)
-    Path("docs/verification.json").write_text(json.dumps(output, indent=2), encoding="utf-8")
+    Path("docs/verification.json").write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(output, indent=2))

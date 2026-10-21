@@ -1,0 +1,24 @@
+{
+  "review_date": "2026-10-21",
+  "automated_tests": {"passed": 45, "failed": 0, "skipped": 0},
+  "actual_resume_http_checkpoints": {"passed": 15, "total": 15},
+  "running_server_smoke_checkpoints": {"passed": 13, "total": 13},
+  "dataset": {"records": 1800, "unique_ids": 1800, "active_by_metadata": 1800, "with_skills": 1800, "explicit_numeric_experience": 599},
+  "dependency_check": "passed",
+  "javascript_syntax": "passed",
+  "llm_evidence": "llm-verification.json",
+  "docker_ci_evidence": "ci-verification.json",
+  "railway": {
+    "status": "blocked_before_project_creation",
+    "error": "Deploys have been paused temporarily",
+    "status_source": "https://status.railway.com/",
+    "incident": "Dashboard and API unavailable, builds paused",
+    "latest_observed_incident_update_utc": "2026-10-21T11:33:00Z",
+    "public_url": null,
+    "public_http_tests": "not_run",
+    "host_volume_persistence_test": "not_run"
+  },
+  "employer_auto_submission": "not_implemented_assisted_workflow_only",
+  "screen_recording": "not_recorded_script_in_DEMO.md",
+  "note": "Local checks are not evidence of a live Railway deployment. Reports exclude resume contact values and credentials."
+}

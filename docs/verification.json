@@ -1,11 +1,11 @@
 {
-  "reviewed_at": "2026-10-21T11:52:34.669179+00:00",
+  "reviewed_at": "2026-10-21T12:06:00.266586+00:00",
   "automated_tests": {
     "tests": 45,
     "errors": 0,
     "failures": 0,
     "skipped": 0,
-    "seconds": 5.14
+    "seconds": 5.21
   },
   "runtime": {
     "python": "3.13.2",
@@ -28,7 +28,7 @@
     "projects_detected": 3,
     "total_initial_matches": 38,
     "react_india_matches": 4,
-    "upload_and_match_ms": 174
+    "upload_and_match_ms": 155
   },
   "actual_resume_http_checkpoints": 15,
   "actual_resume_http_passed": 15,
@@ -49,9 +49,9 @@
   "llm_model": "gemini-3.8-flash",
   "external_employer_submission_verified": false,
   "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
-  "deployment": "User will deploy; configuration and synthetic smoke checker included",
+  "deployment": "Blocked: Railway platform outage; project creation rejected; no public URL",
   "public_repository": "https://github.com/ABHISHEK27Y/hidani-assessment",
   "github_ci": "passed",
-  "recording": "Outline prepared; recording pending release",
+  "recording": "Five-minute script prepared in DEMO.md; recording pending release",
   "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report."
 }

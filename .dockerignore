@@ -9,6 +9,7 @@ data/app.db*
 tmp
 tests
 .env
+.env.*
 dist
 docs
 .github

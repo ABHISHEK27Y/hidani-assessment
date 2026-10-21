@@ -1,8 +1,29 @@
-# Complete local project review — 21 October 2026
+# Final assessment report — 21 October 2026
 
-The local project supports resume upload, extraction, experience-aware recommendations, conversational refinement, job details, application tracking and restored history through a redesigned black/purple glass interface. The local API and browser flows were exercised. The release handoff includes public source publication and deployment files; the user will perform deployment.
+The project supports resume upload, extraction, experience-aware recommendations, conversational refinement, job details, application tracking and restored history through a black/purple glass interface. The final local API, actual-resume and browser checks passed. Deployment was attempted on Railway, but its platform outage blocked project creation.
 
 The acceptance status for every point in the brief is in **[ASSESSMENT_CHECKLIST.md](ASSESSMENT_CHECKLIST.md)**. The local flow and live Gemini tool routing are verified. Actual employer auto-submission, a public live deployment and the final recording remain incomplete.
+
+## Final checkpoint summary
+
+| Checkpoint | Result |
+|---|---|
+| 1,500–2,000 real listings, JSON database and scraper | Done: 1,800 unique rows; all required fields and skills present |
+| PDF and DOCX parsing; all seven profile sections | Done: automated coverage and actual-resume verification |
+| Role, skills and experience matching with reasons | Done |
+| Natural chat refinement and conversation memory | Done |
+| Orchestrator with parsing, matching and application tools | Done |
+| Gemini function calling and provider-error fallback | Done; earlier live evidence retained |
+| Application record, date, status and duplicate prevention | Done for the assisted workflow |
+| Automatic submission to an external employer | Incomplete; requires an authorized employer integration |
+| Bad file, no matches and invalid job number handling | Done |
+| No login requirement | Done |
+| Public source, README, dataset and scraper | Done: ABHISHEK27Y/hidani-assessment |
+| Railway deployment and public end-to-end check | Blocked by Railway's platform outage |
+| Five-minute video script | Done: DEMO.md |
+| Actual screen recording and final submission | Pending |
+
+This is not a claim that every assessment requirement is complete. In particular, the brief's “assistant applies” requirement remains only partially implemented, and the live-link requirement is blocked. Local test success cannot establish a working public deployment.
 
 ## Resume test
 
@@ -50,7 +71,7 @@ The final match counts and response timing are recorded in the redacted `docs/ve
 
 The machine-readable test summary, redacted actual-resume result and browser dimensions are in `docs/verification.json`. Dataset schema and source-check evidence are in `docs/data-audit.json`.
 
-Final results: **45 automated tests passed, with no failures or skips**, inside the isolated virtual environment, and **15 of 15 actual-resume HTTP checkpoints passed**. The synthetic deployment checker also passed **13/13 checkpoints** against localhost. `pip check`, JavaScript syntax, Python compilation and Git whitespace checks passed. The actual resume produced 38 initial matches and four matches after React/India refinement; its release-check upload-and-match request took 174 ms on this machine. This is a single local observation, not a load-test result. The clean environment reports a dependency-level Starlette/AnyIO deprecation warning; it does not cause a test failure.
+Final recheck: **45 automated tests passed, with no failures or skips**, inside the isolated virtual environment, and **15 of 15 actual-resume HTTP checkpoints passed**. The synthetic deployment checker also passed **13/13 checkpoints** against localhost. `pip check` and JavaScript syntax passed. The actual resume produced 38 initial matches and four matches after React/India refinement; its latest upload-and-match request took 155 ms on this machine. This is a single local observation, not a load-test result. The environment reports one dependency-level Starlette/AnyIO deprecation warning; it does not cause a test failure. The sandboxed test attempt stalled; the complete run outside the sandbox passed in 5.34 seconds. See `docs/final-release-check.json` for release scope.
 
 ## API review
 
@@ -61,12 +82,28 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 ## Remaining limits and release work
 
 1. **Real employer submission is incomplete.** Assisted mode returns the original form and records candidate confirmation. Simulation mode creates a visibly simulated local receipt. Neither proves that an employer received an application.
-2. **The earlier provider blocker was resolved by switching to Gemini.** OpenAI returned HTTP 429 with code `credit_balance_exhausted`. Gemini 3.8 Flash is now the default and passed both a live synthetic function call and the full HTTP/orchestrator/matching flow. Its documented Free tier is quota-limited and follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json`.
+2. **Gemini is verified and quota-limited.** Gemini 3.8 Flash is the default and passed both a live synthetic function call and the full HTTP/orchestrator/matching flow. Its Free tier follows the user's Google project settings. Keys are excluded from source/reports, and Gemini failure never automatically invokes OpenAI. See `docs/llm-verification.json`.
 3. **External source pages could not be verified.** Sample HTTP requests returned 403 and the browser displayed a security-verification screen. The source API worked; the blocker was not bypassed.
-4. **Deployment belongs to the user's handoff.** No public live link or final recording has been produced here. Docker, Compose, Railway configuration, a synthetic public-domain checker and step-by-step instructions are included. GitHub CI builds and exercises the Docker image; its recorded status is in `docs/verification.json`.
+4. **Railway deployment is blocked by an outage.** The connected account was verified, and project creation was attempted. Railway returned “Deploys have been paused temporarily”. The [official status page](https://status.railway.com/) reported “Dashboard and API unavailable, builds paused”, with builds paused in all regions. Its observed update was 21 October, 11:33 UTC (5:03 PM IST). No project, service or public domain was created. Therefore public HTTP checks, hosted Gemini routing and persistence after redeployment are not marked passed. The Docker image has passed GitHub CI; that is separate evidence from hosting.
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
 6. **Parsing is conservative text extraction.** Scanned resumes need OCR or a text-based export. More layouts should be added as regression fixtures when encountered; there is no claim of perfect parsing of every resume.
-7. **The installation blocker was resolved.** After earlier PyPI timeouts, the full installation completed inside an isolated Python 3.13.2 virtual environment. `pip check` and all 45 tests passed there. `constraints.txt` records versions without local wheel paths; Linux/container compatibility is checked in CI.
+7. **Installation is reproducible.** The isolated Python environment passed dependency checks and all tests. `constraints.txt` records package versions without local wheel paths; Linux/container compatibility is checked in CI.
+
+## Submission cleanup
+
+- Removed the obsolete phase-plan document and its README link; current status lives in this report and the checklist.
+- Replaced the short recording outline with a complete five-minute narration and screen-action script.
+- Kept the required source, job JSON, scraper, tests, setup files and deployment configuration.
+- Private resumes, keys, local databases, caches, downloaded wheels and temporary checks remain excluded from Git and the source archive.
+- Kept the existing interface and feature scope; no extra product features were added during this review.
+
+## Remaining release sequence
+
+1. After Railway restores builds, create the project/service from the repository's `main` branch.
+2. Attach `/data`, set `DATABASE_PATH=/data/app.db`, configure the Gemini secret and keep one replica.
+3. Generate the domain; verify `/health`, the full public HTTP flow and Gemini routing using fictional data.
+4. Redeploy and verify that a disposable workspace survives, then remove that test workspace.
+5. Record the five-minute walkthrough and submit the live URL, repository URL and recording. Resolve or explicitly disclose the external-application gap.
 
 ## Release handoff
 

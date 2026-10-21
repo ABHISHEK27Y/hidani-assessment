@@ -118,10 +118,10 @@ node --check static/app.js
 
 The private-resume verifier accepts only localhost URLs, omits contact values from its report, and deletes its test workspace afterwards. Tests cover PDF/DOCX parsing, date ranges, skills, matching, geography and timezone filters, pagination, API validation, malicious/invalid tool arguments, provider failure, duplicate writes, session isolation, application modes, expiry and state restoration. Browser checks cover upload, filtering, detail dialogs, application initiation, reset, fixed scrolling and responsive layouts.
 
-See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the project review](REVIEW.md), [the delivery phases](PHASES.md), and [the recording outline](DEMO.md).
+See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the final project report](REVIEW.md), and [the five-minute video script](DEMO.md).
 
 Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation completed and `pip check` passed. Gemini also passed a live synthetic function call and the full HTTP/orchestrator flow; see [provider evidence](docs/llm-verification.json). GitHub Actions builds and smoke-tests the Docker image; the exact tested commit and run are in [CI evidence](docs/ci-verification.json).
 
 ## Release phase
 
-The user will handle deployment. The source includes a Dockerfile, Compose setup, Railway configuration and a deployment smoke checker. Use a persistent volume at `/data`, set `DATABASE_PATH=/data/app.db`, keep one replica for SQLite, and follow [DEPLOYMENT.md](DEPLOYMENT.md). Public-domain verification and the 3–5 minute recording must be completed after deployment. Publication and CI results are recorded in the assessment checklist and review.
+Deployment was attempted on **21 October 2026**, but Railway rejected project creation with “Deploys have been paused temporarily”. Its [status page](https://status.railway.com/) reported a platform outage and paused builds. **There is no verified live link yet.** The source includes the Dockerfile, Compose setup, Railway configuration and a deployment smoke checker. Use a persistent volume at `/data`, set `DATABASE_PATH=/data/app.db`, keep one replica for SQLite, and follow [DEPLOYMENT.md](DEPLOYMENT.md). Public-domain verification, a persistence check after redeployment, and the actual 3–5 minute recording remain pending. See [release evidence](docs/final-release-check.json).
