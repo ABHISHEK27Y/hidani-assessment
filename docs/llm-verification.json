@@ -1,13 +1,15 @@
 {
   "provider": "gemini",
-  "model": "gemini-3.8-flash",
+  "model": "gemini-3.5-flash-lite",
   "live_function_call_verified": true,
   "http_orchestrator_verified": true,
   "router": "gemini",
   "tools": [
-    "match_jobs"
+    "route_job_request"
   ],
   "action": "recommend",
-  "data": "Synthetic profile and prompt only; no private resume/contact values",
+  "data": "Synthetic prompt only; no private resume/contact values",
+  "scope": "local function call and local HTTP orchestrator; hosted check pending",
+  "previous_verified_model": "gemini-3.8-flash",
   "employer_submission": false
 }

@@ -37,7 +37,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **R01 — Done:** A conversational assistant, with resume upload in the conversation and subsequent requests handled as messages.
 - [x] **R02 — Done:** An orchestrator with specialized parsing, matching, profile, application and status tools.
 - [x] **R03 — Done:** Gemini is the default function-calling provider. Arguments are validated with the server's schema before dispatch. An explicit OpenAI option retains its strict schema. Invalid arguments, provider failure and Gemini quota exhaustion fall back to local rules without switching providers.
-- [x] **R04 — Done locally:** Gemini 3.8 Flash passed both a live synthetic function call and the complete HTTP chat/orchestrator/matching flow. The hosted routing default is now Gemini 3.5 Flash-Lite for lower latency; its public deployment check is tracked in S10. Keys are stored only in ignored local configuration. Redacted historical evidence is in `docs/llm-verification.json`.
+- [x] **R04 — Done locally:** Default Gemini 3.5 Flash-Lite passed both a live synthetic function call and the complete local HTTP chat/orchestrator flow. Its public deployment check is tracked in S10. Keys are stored only in ignored local configuration. Redacted evidence is in `docs/llm-verification.json`.
 - [x] **R05 — Done:** Conversation memory and rich results survive reload through SQLite-backed history.
 - [x] **R06 — Done:** Applications store job ID, initiation/submission dates and status. Duplicate protection is enforced by a unique database key, including simultaneous requests.
 - [x] **R07 — Done:** Unreadable, empty, scanned, password-protected, unsupported and oversized resume errors are handled clearly.
