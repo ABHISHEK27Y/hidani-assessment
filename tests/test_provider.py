@@ -29,7 +29,8 @@ def test_gemini_uses_its_own_key_endpoint_and_validated_tools(monkeypatch):
     assert result['skills'] == ['React'] and result['location'] == 'India'
     assert captured['client']['api_key'] == 'synthetic-gemini-key'
     assert captured['client']['base_url'] == agent.GEMINI_BASE_URL
-    assert captured['client']['max_retries'] == 0
+    assert captured['client']['max_retries'] == 1
+    assert captured['client']['timeout'] == 25
     assert captured['request']['model'] == 'gemini-3.8-flash'
     assert 'strict' not in captured['request']['tools'][0]['function']
     assert 'synthetic-' not in json.dumps(agent.llm_status())
