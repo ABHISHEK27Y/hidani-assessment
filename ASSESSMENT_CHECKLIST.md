@@ -65,7 +65,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **S03 — Done:** README covers setup, agent architecture, dataflow, APIs, configuration, limitations and verification commands.
 - [x] **S04 — Done:** A timed five-minute script in simple English is prepared in `DEMO.md`, with screen actions and honest application narration.
 - [x] **S05 — Done:** Public source repository: https://github.com/ABHISHEK27Y/hidani-assessment. Its JSON catalogue, scraper, documentation and tests are included.
-- [ ] **S06 — Blocked by Railway outage:** Deployment was requested and attempted on 21 October 2026. Railway rejected project creation with “Deploys have been paused temporarily”; its official status page confirmed paused builds across regions. No public link exists yet, so public HTTP tests and hosted-volume persistence remain unverified. Docker, Compose, Railway configuration and a smoke checker are included.
+- [ ] **S06 — Render deployment pending:** Railway rejected project creation during its outage. A free Render Blueprint now defines a Docker web service and PostgreSQL database. No public link exists yet, so public HTTP tests and hosted persistence are unverified. The smoke checker is ready.
 - [ ] **S07 — Pending release:** The actual 3–5 minute screen recording.
 - [ ] **S08 — Pending release:** Final submission of URLs, code/data and recording.
 - [x] **S09 — Deadline recorded:** Assessment received **19 October 2026**; five days later is **24 October 2026**. Submit earlier if possible because no exact cutoff time was provided.

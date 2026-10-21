@@ -13,8 +13,19 @@ ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = Path(os.getenv("DATABASE_PATH", str(ROOT / "data/app.db")))
 
 
+def _postgres():
+    if os.getenv("DATABASE_URL"):
+        from app import postgres_store
+        return postgres_store
+    return None
+
+
 @contextmanager
 def connect():
+    if backend := _postgres():
+        with backend.connect() as db:
+            yield db
+        return
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(DB_PATH, timeout=10)
     db.row_factory = sqlite3.Row
@@ -27,6 +38,8 @@ def connect():
 
 
 def init_db():
+    if backend := _postgres():
+        return backend.init_db()
     with connect() as db:
         db.execute("PRAGMA journal_mode=WAL")
         db.executescript("""
@@ -68,6 +81,8 @@ def _now():
 
 
 def session(session_id: str):
+    if backend := _postgres():
+        return backend.session(session_id)
     with connect() as db:
         db.execute("INSERT OR IGNORE INTO sessions(id, updated_at) VALUES (?, ?)", (session_id, _now()))
         row = db.execute("SELECT * FROM sessions WHERE id=?", (session_id,)).fetchone()
@@ -76,6 +91,8 @@ def session(session_id: str):
 
 
 def update_session(session_id: str, **fields):
+    if backend := _postgres():
+        return backend.update_session(session_id, **fields)
     allowed = {"profile": "profile_json", "filters": "filters_json", "last_jobs": "last_jobs_json"}
     if set(fields) - set(allowed):
         raise ValueError("Unknown session field")
@@ -88,6 +105,8 @@ def update_session(session_id: str, **fields):
 
 
 def add_message(session_id: str, role: str, content: str, payload: dict | None = None):
+    if backend := _postgres():
+        return backend.add_message(session_id, role, content, payload)
     with connect() as db:
         db.execute("INSERT INTO messages(session_id,role,content,created_at,payload_json) VALUES (?,?,?,?,?)",
                    (session_id, role, content[:4000], _now(), json.dumps(payload) if payload else None))
@@ -95,6 +114,8 @@ def add_message(session_id: str, role: str, content: str, payload: dict | None =
 
 
 def history(session_id: str, limit=40):
+    if backend := _postgres():
+        return backend.history(session_id, limit)
     with connect() as db:
         rows = db.execute("SELECT id, role, content, created_at, payload_json FROM messages WHERE session_id=? ORDER BY id DESC LIMIT ?", (session_id, limit)).fetchall()
     return [{"id": row["id"], "role": row["role"], "content": row["content"], "created_at": row["created_at"],
@@ -102,6 +123,8 @@ def history(session_id: str, limit=40):
 
 
 def create_application(session_id: str, job_id: str, mode="assisted"):
+    if backend := _postgres():
+        return backend.create_application(session_id, job_id, mode)
     now = _now()
     simulated = mode == "simulation"
     receipt = "SIM-" + uuid.uuid4().hex[:12].upper() if simulated else None
@@ -116,6 +139,8 @@ def create_application(session_id: str, job_id: str, mode="assisted"):
 
 
 def confirm_application(session_id: str, job_id: str):
+    if backend := _postgres():
+        return backend.confirm_application(session_id, job_id)
     now = _now()
     with connect() as db:
         db.execute("UPDATE applications SET status='submitted', applied_at=?, submitted_at=?, updated_at=? WHERE session_id=? AND job_id=? AND status='awaiting_submission'", (now, now, now, session_id, job_id))
@@ -124,11 +149,15 @@ def confirm_application(session_id: str, job_id: str):
 
 
 def applications(session_id: str):
+    if backend := _postgres():
+        return backend.applications(session_id)
     with connect() as db:
         return [dict(row) for row in db.execute("SELECT * FROM applications WHERE session_id=? ORDER BY created_at DESC", (session_id,))]
 
 
 def delete_session(session_id: str):
+    if backend := _postgres():
+        return backend.delete_session(session_id)
     with connect() as db:
         for table in ("messages", "applications", "sessions"):
             column = "id" if table == "sessions" else "session_id"

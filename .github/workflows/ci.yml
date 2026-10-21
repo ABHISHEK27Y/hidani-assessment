@@ -38,6 +38,35 @@ jobs:
           exit 1
       - name: Test running deployment
         run: python scripts/smoke_test.py --base-url http://127.0.0.1:8000
+      - name: Start PostgreSQL for free-host verification
+        run: |
+          docker network create orbit-test-net
+          docker run -d --name orbit-test-db --network orbit-test-net \
+            -e POSTGRES_PASSWORD=orbit-ci-password -e POSTGRES_DB=orbit \
+            postgres:17-alpine
+          for attempt in $(seq 1 30); do
+            if docker exec orbit-test-db pg_isready -U postgres -d orbit; then exit 0; fi
+            sleep 2
+          done
+          docker logs orbit-test-db
+          exit 1
+      - name: Start image with PostgreSQL
+        run: |
+          docker run -d --name orbit-postgres-ci --network orbit-test-net \
+            -p 8001:8000 \
+            -e DATABASE_URL=postgresql://postgres:orbit-ci-password@orbit-test-db:5432/orbit \
+            orbit-ci
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8001/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs orbit-postgres-ci
+          exit 1
+      - name: Test running PostgreSQL deployment
+        run: python scripts/smoke_test.py --base-url http://127.0.0.1:8001
       - name: Show container diagnostics
         if: failure()
-        run: docker logs orbit-ci || true
+        run: |
+          docker logs orbit-ci || true
+          docker logs orbit-postgres-ci || true
+          docker logs orbit-test-db || true

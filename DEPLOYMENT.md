@@ -32,6 +32,18 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log
 
 Copy the example only when `.env` does not already contain your configuration.
 
+## Render: free assessment deployment
+
+The included `render.yaml` defines two resources: a free Docker web service and a free PostgreSQL database. `DATABASE_URL` is filled from the database's internal connection string, so application history is kept outside the web container. The Gemini key is prompted as a secret during Blueprint creation; it is never stored in Git.
+
+1. In the Render Dashboard, select **New → Blueprint** and connect `ABHISHEK27Y/hidani-assessment` on `main`. Render reads `render.yaml`.
+2. Review the resource list and confirm that **both** the web service and Postgres show the **Free** plan. Enter the Gemini key only in the secret prompt. Do not enable a paid plan or add a persistent disk.
+3. Deploy and wait for `/health` to report `ok: true`, `jobs: 1800`, and `llm_configured: true`.
+4. Run `python scripts/smoke_test.py --base-url https://YOUR-APP.onrender.com` from the local project. It creates fictional data and removes its test workspace.
+5. Upload a fictional resume in the browser and start one test application. Reload, then redeploy the web service and verify that the same workspace still shows its history and application. Remove the test workspace after verification.
+
+[Render's Free plan](https://render.com/docs/free) spins the web service down after 15 minutes idle, and the next request can take about a minute to wake it. Free Postgres expires **30 days after creation** and has no backups. Export or move any data you need to keep before that deadline. Keep the demo awake immediately before recording; never submit the local URL as the live link.
+
 ## Gemini free-tier configuration (default)
 
 Local parsing, recommendations, supported chat commands and tracking work without a provider key. Ambiguous phrasing uses Gemini function calling when its key is configured.

@@ -30,7 +30,8 @@ Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. 
 | `LLM_PROVIDER` | `gemini` | Select `gemini`, explicit `openai`, or `none` for local commands only |
 | `GEMINI_API_KEY` | unset | Google AI Studio key for Gemini intent interpretation |
 | `GEMINI_MODEL` | `gemini-3.8-flash` | Default Gemini model; has a Google-documented free API tier |
-| `DATABASE_PATH` | `data/app.db` | Persistent profile, conversation and application database |
+| `DATABASE_PATH` | `data/app.db` | Local SQLite database path |
+| `DATABASE_URL` | unset | PostgreSQL URL; selects persistent Postgres storage on free hosts |
 | `JOBS_PATH` | `data/jobs.json` | Job snapshot location |
 | `OPENAI_API_KEY` | unset | Used only when `LLM_PROVIDER=openai` is explicitly selected |
 | `OPENAI_MODEL` | `gpt-4o-mini` | Model for the explicit OpenAI provider |
@@ -72,7 +73,7 @@ flowchart LR
 - **Matching:** Explicit skill filters, role alignment, work duration, seniority, country restrictions and known country timezone offsets constrain results. The ranking explains shared skills and missing experience information. Unknown numeric experience is not invented. A relevance score is not an offer probability.
 - **Orchestration:** `app/agent.py` validates model arguments before invoking tools. Clear commands use local rules. The model cannot invent listings or directly modify the database. The existing OpenAI SDK connects to Google's documented Gemini compatibility endpoint by default. Resume text and profile payloads are not included in the model request; recent conversation text is used for context.
 - **Memory:** Rich message payloads restore profile cards, job results and application records after reload. The server keeps up to 200 messages per workspace and returns the latest 40.
-- **Persistence:** SQLite transactions and a unique `(session_id, job_id)` key prevent duplicates, including simultaneous requests. Started and submitted timestamps are distinct. The browser holds an anonymous UUID; there is no account creation.
+- **Persistence:** Local SQLite or hosted PostgreSQL transactions and a unique `(session_id, job_id)` key prevent duplicates, including simultaneous requests. Set `DATABASE_URL` to select PostgreSQL. Started and submitted timestamps are distinct. The browser holds an anonymous UUID; there is no account creation.
 
 Anonymous UUIDs act as bearer secrets. Anyone who knows a workspace ID can access that workspace. This is a no-auth assessment app with local SQLite storage, not an encrypted vault or cross-device account system. Do not publish the application database, `.env`, private resume, or private test files. The repository ignores PDF/DOCX files and temporary verification data.
 
@@ -124,4 +125,4 @@ Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. T
 
 ## Release phase
 
-Deployment was attempted on **21 October 2026**, but Railway rejected project creation with “Deploys have been paused temporarily”. Its [status page](https://status.railway.com/) reported a platform outage and paused builds. **There is no verified live link yet.** The source includes the Dockerfile, Compose setup, Railway configuration and a deployment smoke checker. Use a persistent volume at `/data`, set `DATABASE_PATH=/data/app.db`, keep one replica for SQLite, and follow [DEPLOYMENT.md](DEPLOYMENT.md). Public-domain verification, a persistence check after redeployment, and the actual 3–5 minute recording remain pending. See [release evidence](docs/final-release-check.json).
+The current free-host path is Render: `render.yaml` defines a free Docker web service and free PostgreSQL database. The database preserves application history when the web service sleeps or restarts. Railway rejected project creation during its 21 October outage. **There is no verified live link yet.** Follow [DEPLOYMENT.md](DEPLOYMENT.md). Public-domain verification, a persistence check after redeployment, and the actual 3–5 minute recording remain pending. See [release evidence](docs/final-release-check.json).
