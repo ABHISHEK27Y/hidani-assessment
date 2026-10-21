@@ -1,9 +1,25 @@
 {
   "review_date": "2026-10-21",
-  "automated_tests": {"passed": 45, "failed": 0, "skipped": 0},
-  "actual_resume_http_checkpoints": {"passed": 15, "total": 15},
-  "running_server_smoke_checkpoints": {"passed": 13, "total": 13},
-  "dataset": {"records": 1800, "unique_ids": 1800, "active_by_metadata": 1800, "with_skills": 1800, "explicit_numeric_experience": 599},
+  "automated_tests": {
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0
+  },
+  "actual_resume_http_checkpoints": {
+    "passed": 15,
+    "total": 15
+  },
+  "running_server_smoke_checkpoints": {
+    "passed": 13,
+    "total": 13
+  },
+  "dataset": {
+    "records": 1800,
+    "unique_ids": 1800,
+    "active_by_metadata": 1800,
+    "with_skills": 1800,
+    "explicit_numeric_experience": 599
+  },
   "dependency_check": "passed",
   "javascript_syntax": "passed",
   "llm_evidence": "llm-verification.json",
@@ -20,5 +36,19 @@
   },
   "employer_auto_submission": "not_implemented_assisted_workflow_only",
   "screen_recording": "not_recorded_script_in_DEMO.md",
-  "note": "Local checks are not evidence of a live Railway deployment. Reports exclude resume contact values and credentials."
+  "note": "Local checks are not evidence of a live Railway deployment. Reports exclude resume contact values and credentials.",
+  "github_ci": {
+    "head_sha": "bfe58a71f3d7d0ec061ae5f5c6c1559d02c76879",
+    "conclusion": "success",
+    "html_url": "https://github.com/ABHISHEK27Y/hidani-assessment/actions/runs/39597047864"
+  },
+  "browser_recheck": {
+    "resume_upload": true,
+    "react_india_filter": true,
+    "apply_to_job_3": true,
+    "status_query": true,
+    "reload_restore": true,
+    "console_errors": 0,
+    "console_warnings": 0
+  }
 }
