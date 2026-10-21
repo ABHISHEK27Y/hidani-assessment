@@ -47,8 +47,15 @@
   "external_employer_submission_verified": false,
   "external_source_page_checks": "HTTP 403 / browser security verification; not verified",
   "deployment": "User will deploy; configuration and synthetic smoke checker included",
-  "public_repository": "https://github.com/ABHISHEK27Y/hidani-assignmnet",
+  "public_repository": "https://github.com/ABHISHEK27Y/hidani-assessment",
   "github_ci": "passed",
   "recording": "Outline prepared; recording pending release",
-  "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report."
+  "privacy": "No raw resume text, phone number, email address, filename, or workspace ID is included in this report.",
+  "live_llm_attempt": {
+    "attempted": true,
+    "http_status": 429,
+    "provider_code": "credit_balance_exhausted",
+    "result": "Provider account credit required; no validated tool response",
+    "data": "Synthetic job-search prompt only; no private resume data"
+  }
 }

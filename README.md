@@ -1,8 +1,8 @@
 # Orbit — a conversational job search workspace
 
-[![Verify project](https://github.com/ABHISHEK27Y/hidani-assignmnet/actions/workflows/ci.yml/badge.svg)](https://github.com/ABHISHEK27Y/hidani-assignmnet/actions/workflows/ci.yml)
+[![Verify project](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml)
 
-[Public repository](https://github.com/ABHISHEK27Y/hidani-assignmnet) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assignmnet/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
+[Public repository](https://github.com/ABHISHEK27Y/hidani-assessment) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assessment/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
 
 Orbit reads a resume, explains relevant jobs, refines results through conversation, and keeps application progress in one workspace. It is built for the Hidani Tech SDE Intern assessment with Python/FastAPI, browser JavaScript, a 1,800-job JSON snapshot, and SQLite. The interface uses black glass panels and muted purple accents, with desktop, tablet and phone layouts.
 
@@ -33,7 +33,7 @@ Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. 
 | `OPENAI_MODEL` | `gpt-4o-mini` | Model for ambiguous requests |
 | `APPLICATION_MODE` | `assisted` | Assisted external handoff, or explicit `simulation` for assessment demos |
 
-The local router supports resume-driven matching, remote/on-site filters, multiple skills, countries, entry-level and internship filters, pagination, profile corrections, job details, application initiation and status queries. An optional LLM interprets ambiguous phrasing using a strict function schema. The app continues with the local router if the provider times out or returns invalid arguments. No OpenAI key was available during this review: provider integration and failure paths are tested with mocks, not a paid live call.
+The local router supports resume-driven matching, remote/on-site filters, multiple skills, countries, entry-level and internship filters, pagination, profile corrections, job details, application initiation and status queries. An optional LLM interprets ambiguous phrasing using a strict function schema. The app continues with the local router if the provider times out or returns invalid arguments. A key was configured locally and a synthetic live call was attempted; OpenAI returned HTTP 429 with `credit_balance_exhausted`. Successful live interpretation remains unverified until account credits are available. Mocked integration and failure-path tests pass. No key is included in the repository.
 
 ## Application behavior
 

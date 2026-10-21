@@ -61,7 +61,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 ## Remaining limits and release work
 
 1. **Real employer submission is incomplete.** Assisted mode returns the original form and records candidate confirmation. Simulation mode creates a visibly simulated local receipt. Neither proves that an employer received an application.
-2. **The live LLM path is unverified.** No provider key is configured. Actual function-calling code and fallback behavior are present; mocked checks do not establish account/model availability.
+2. **The live LLM path is blocked by API balance.** A supplied key was saved only in the ignored local `.env`. A synthetic provider request returned HTTP 429 with code `credit_balance_exhausted`. Successful live function calling remains unverified until account credits are available and the check is rerun. Mocked integration and fallback tests pass; the key is excluded from source and reports.
 3. **External source pages could not be verified.** Sample HTTP requests returned 403 and the browser displayed a security-verification screen. The source API worked; the blocker was not bypassed.
 4. **Deployment belongs to the user's handoff.** No public live link or final recording has been produced here. Docker, Compose, Railway configuration, a synthetic public-domain checker and step-by-step instructions are included. GitHub CI builds and exercises the Docker image; its recorded status is in `docs/verification.json`.
 5. **The dataset is a remote-job snapshot.** On-site filtering is implemented/tested, but this source contains remote roles. Expiry metadata and a valid source URL do not guarantee current employer availability. Missing numeric experience remains explicitly unknown.
@@ -70,7 +70,7 @@ The no-auth brief is implemented with anonymous UUID workspaces. This provides s
 
 ## Release handoff
 
-- Public source target: https://github.com/ABHISHEK27Y/hidani-assignmnet
+- Public source target: https://github.com/ABHISHEK27Y/hidani-assessment
 - Full instructions: `DEPLOYMENT.md`.
 - Windows launcher: `scripts/run.ps1`.
 - Deployment configuration: `Dockerfile`, `compose.yaml`, `railway.json`, `requirements.txt`, `constraints.txt` and `.env.example`.
