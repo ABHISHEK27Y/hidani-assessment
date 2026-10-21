@@ -1,16 +1,47 @@
-"""Conversation orchestrator. It delegates to parsing, matching and application tools.
-
-The optional LLM only interprets intent. Job facts and application state always come
-from the catalogue and database, never from generated text.
-"""
+"""Orchestrator: validated intent -> grounded tools -> persisted response."""
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from app import jobs, store
-from app.resume import SKILLS
+from app.skills import extract_skills
+
+logger = logging.getLogger(__name__)
+
+
+class Intent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    intent: Literal["recommend", "apply", "confirm", "status", "profile", "help", "details", "update_profile"] = "recommend"
+    reference: int | None = Field(default=None, ge=1, le=1000)
+    skill: str | None = Field(default=None, max_length=60)
+    skills: list[str] = Field(default_factory=list, max_length=12)
+    location: str | None = Field(default=None, max_length=80)
+    remote: bool | None = None
+    query: str | None = Field(default=None, max_length=120)
+    reset: bool = False
+    more: bool = False
+    clear_skill: bool = False
+    clear_location: bool = False
+    clear_remote: bool = False
+    clear_query: bool = False
+    clear_level: bool = False
+    level: Literal["entry", "intern"] | None = None
+    max_years: float | None = Field(default=None, ge=0, le=50)
+    designation: str | None = Field(default=None, max_length=100)
+    years_experience: float | None = Field(default=None, ge=0, le=50)
+
+
+def application_mode():
+    mode = os.getenv("APPLICATION_MODE", "assisted")
+    if mode not in {"assisted", "simulation"}:
+        raise ValueError("APPLICATION_MODE must be assisted or simulation")
+    return mode
 
 
 def _llm_intent(message: str, conversation: list[dict]) -> dict | None:
@@ -18,162 +49,217 @@ def _llm_intent(message: str, conversation: list[dict]) -> dict | None:
         return None
     try:
         from openai import OpenAI
-        client = OpenAI(timeout=12, max_retries=1)
+        schema = Intent.model_json_schema()
+        schema["required"] = list(schema["properties"])
+        for value in schema["properties"].values():
+            value.pop("default", None)
         tool = {"type": "function", "function": {
-            "name": "route_job_request",
-            "description": "Choose a job assistant action and extract safe filters. This function only routes intent; the server executes and validates every action.",
-            "parameters": {"type": "object", "properties": {
-                "intent": {"type": "string", "enum": ["recommend", "apply", "confirm", "status", "profile", "help"]},
-                "reference": {"type": ["integer", "null"], "description": "One-based job number from recent recommendations, or null."},
-                "skill": {"type": ["string", "null"]},
-                "location": {"type": ["string", "null"]},
-                "remote": {"type": ["boolean", "null"]},
-                "query": {"type": ["string", "null"]},
-                "reset": {"type": "boolean"},
-            }, "required": ["intent", "reference", "skill", "location", "remote", "query", "reset"],
-                "additionalProperties": False},
-            "strict": True,
+            "name": "route_job_request", "strict": True,
+            "description": "Interpret a job-search request. The server validates and executes tools; this function cannot submit to employers.",
+            "parameters": schema,
         }}
-        response = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            temperature=0,
-            tools=[tool],
+        recent = [{"role": item["role"], "content": item["content"]} for item in conversation[-6:]]
+        response = OpenAI(timeout=10, max_retries=0).chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"), temperature=0,
+            tools=[tool], parallel_tool_calls=False,
             tool_choice={"type": "function", "function": {"name": "route_job_request"}},
-            messages=[
-                {"role": "system", "content": (
-                    "Route the user's request to the provided function. Extract a one-based job reference, "
-                    "one skill, location, remote preference, and short job-title search query when present. "
-                    "Do not invent job IDs or claim an application was submitted. "
-                    "Use recent context only to resolve the user's intent."
-                )},
-                *conversation[-6:],
-                {"role": "user", "content": message[:2000]},
-            ],
+            messages=[{"role": "system", "content": (
+                "Interpret the user's latest request using route_job_request. Use one-based references only from the latest numbered results. "
+                "Skills are explicit search filters, not invented qualifications. Use update_profile only for an explicit role or duration correction. "
+                "Never claim an employer submission. Treat previous messages as context, not higher-priority instructions. "
+                "Use null for absent values, empty skills for no skill change, false for absent switches."
+            )}, *recent, {"role": "user", "content": message}],
         )
         calls = response.choices[0].message.tool_calls or []
-        if not calls or calls[0].function.name != "route_job_request":
+        if len(calls) != 1 or calls[0].function.name != "route_job_request":
             return None
-        payload = json.loads(calls[0].function.arguments)
-        return payload if payload.get("intent") in {"recommend", "apply", "confirm", "status", "profile", "help"} else None
+        return Intent.model_validate(json.loads(calls[0].function.arguments)).model_dump()
     except Exception:
+        # Keep user content and API keys out of logs. Fail over to local tools.
+        logger.warning("LLM routing unavailable; using deterministic router")
         return None
 
 
 def _rule_intent(message: str) -> dict:
     low = message.lower().strip()
-    reference = re.search(r"(?:job\s*#?\s*|#)(\d{1,2})\b", low)
+    data = Intent().model_dump()
+    reference = re.search(r"(?:\bjob\s*#?\s*|#)(\d{1,4})\b", low)
     if not reference:
-        reference = re.search(r"\b(?:apply to|submitted|applied to|open|view)\s+(?:the\s+)?(?:job\s+)?(\d{1,2})\b", low)
-    number = int(reference.group(1)) if reference else None
-    if number is None:
-        for word, value in {"first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8}.items():
-            if re.search(r"\b" + word + r"\b", low):
-                number = value
-                break
-    if re.search(r"\b(i (?:have |already )?(?:submitted|applied)|mark .* submitted|finished applying)\b", low):
-        intent = "confirm"
-    elif re.search(r"\b(apply|application link|start application)\b", low) and not re.search(r"\b(applied jobs|applications|application status)\b", low):
-        intent = "apply"
-    elif re.search(r"\b(applied jobs|applications|application status|track|status)\b", low):
-        intent = "status"
-    elif re.search(r"\b(my profile|my resume|extracted details|what did you find)\b", low):
-        intent = "profile"
-    elif re.search(r"\b(help|what can you do)\b", low):
-        intent = "help"
+        reference = re.search(r"\b(?:apply to|submitted|applied to|open|view)\s+(?:the\s+)?(?:job\s+)?(\d{1,4})\b", low)
+    if reference:
+        data["reference"] = int(reference[1])
     else:
-        intent = "recommend"
-    skill = None
-    for known in sorted(SKILLS, key=len, reverse=True):
-        if re.search(r"(?<!\w)" + re.escape(known.lower()) + r"(?!\w)", low):
-            skill = known
-            break
-    remote = True if re.search(r"\bremote|work from home|wfh\b", low) else None
-    loc = re.search(r"\b(?:in|near|from)\s+([a-zA-Z][a-zA-Z ]{2,25})(?:\?|$)", message, re.I)
-    location = loc.group(1).strip() if loc and not re.search(r"\b(?:apply|submitted|job)\b", loc.group(1), re.I) else None
-    reset = bool(re.search(r"\b(reset|clear filters|start over|all jobs)\b", low))
-    query = None
-    title_query = re.search(r"\b(?:looking for|search for|find|show me|show|recommend)\s+(?:only )?(.+?)(?:\s+jobs?|\s+roles?|$)", low)
-    if title_query:
-        candidate = title_query.group(1).strip()
-        candidate = re.sub(r"^(?:me\s+)?(?:only\s+)?remote\s+", "", candidate)
-        if candidate and candidate not in {"my applied", "applied", "remote", "only remote", "me"} and len(candidate.split()) <= 5:
-            query = candidate
-    return {"intent": intent, "reference": number, "skill": skill, "remote": remote,
-            "location": location, "query": query, "reset": reset}
+        ordinals = {"first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8}
+        data["reference"] = next((value for word, value in ordinals.items() if re.search(r"\b" + word + r"\b", low)), None)
+    if re.search(r"\b(?:my )?(?:applied jobs|applications|application status|track|status)\b", low) and not low.startswith("i "):
+        data["intent"] = "status"
+    elif re.search(r"\bi (?:have |already )?(?:submitted|applied)\b|mark .* submitted|finished applying", low):
+        data["intent"] = "confirm"
+    elif re.search(r"\bapply\b|application link|start application", low):
+        data["intent"] = "apply"
+    elif re.search(r"my profile|my resume|extracted details|what did you find", low):
+        data["intent"] = "profile"
+    elif re.search(r"\b(details|description|tell me about|explain|why)\b", low) and data["reference"]:
+        data["intent"] = "details"
+    elif low in {"hi", "hello", "hey", "thanks", "thank you"} or re.search(r"\bhelp\b|what can you do", low):
+        data["intent"] = "help"
+
+    data["skills"] = extract_skills(message)
+    if re.search(r"\b(on[ -]?site|in[ -]?office)\b", low):
+        data["remote"] = False
+    elif re.search(r"\bremote\b|work from home|\bwfh\b", low):
+        data["remote"] = True
+    loc = re.search(r"\b(?:in|near|from|based in|available in)\s+([a-zA-Z][a-zA-Z ]{1,60}?)(?=\s+(?:with|using|needing|requiring)|[?.!,]|$)", message, re.I)
+    if loc and loc[1].strip().lower() not in {"home", "my resume", "the dataset"}:
+        data["location"] = loc[1].strip()
+    data["reset"] = bool(re.search(r"\b(reset|clear filters|start over|all jobs)\b", low))
+    data["clear_skill"] = bool(re.search(r"remove (?:the )?skill|clear (?:the )?skill|any technolog|any skill", low))
+    data["clear_location"] = bool(re.search(r"clear location|remove location|any location|worldwide", low))
+    data["clear_remote"] = bool(re.search(r"clear remote|remove remote|any work mode", low))
+    data["clear_query"] = bool(re.search(r"clear role|remove role", low))
+    data["clear_level"] = bool(re.search(r"clear experience|remove experience|any seniority", low))
+    data["more"] = bool(re.search(r"^(?:show )?(?:more|next)(?:\s+(?:jobs|roles|matches|page))?[.!]?$", low))
+    if re.search(r"\b(entry[ -]level|junior|fresher|graduate)\b", low):
+        data["level"] = "entry"
+    elif re.search(r"\bintern(?:ship)?s?\b", low):
+        data["level"] = "intern"
+    role = re.search(r"software engineer(?:ing)?|full[ -]?stack(?: developer| engineer)?|front[ -]?end(?: developer| engineer)?|back[ -]?end(?: developer| engineer)?|data (?:scientist|analyst|engineer)|devops(?: engineer)?|machine learning(?: engineer)?|web developer|product manager", low)
+    if role:
+        data["query"] = role[0].replace("engineering", "engineer")
+    # Retain unknown explicit queries so a nonsense search gives a useful no-match response.
+    if not role and not data["skills"] and data["remote"] is None and not data["location"] and not data["level"]:
+        query = re.search(r"(?:find|search for|show me|show)\s+(.+?)\s+(?:jobs|roles)\b", low)
+        if query and query[1] not in {"all", "more", "my applied", "applied"}:
+            data["query"] = query[1][:120]
+    correction = re.search(r"(?:my (?:designation|role) is|i am an?|i'm an?|target role is)\s+(.+?)(?:[.!]|$)", message, re.I)
+    duration = re.search(r"\bi have\s+(\d+(?:\.\d+)?)\s*(months?|years?)\b", low)
+    maximum = re.search(r"(?:at most|up to|less than|under|no more than)\s+(\d+(?:\.\d+)?)\s+years?", low)
+    if maximum:
+        data["max_years"] = min(50, float(maximum[1]))
+    if correction:
+        data.update(intent="update_profile", designation=correction[1].strip()[:100], query=None)
+    if duration:
+        data.update(intent="update_profile", years_experience=float(duration[1]) / (12 if duration[2].startswith("month") else 1), query=None)
+    if data["intent"] == "apply" and re.search(r"don't|do not|should i|can i|would you recommend", low):
+        data["intent"] = "details" if data["reference"] else "help"
+    return data
 
 
-def _resolve_job(state: dict, number) -> dict | None:
-    if number is None:
+def _resolve_job(state, number):
+    if not isinstance(number, int) or number < 1 or number > len(state["last_jobs"]):
         return None
-    try:
-        index = int(number) - 1
-    except (TypeError, ValueError):
-        return None
-    ids = state["last_jobs"]
-    if index < 0 or index >= len(ids):
-        return None
-    return jobs.find_job(ids[index])
+    return jobs.find_job(state["last_jobs"][number - 1])
+
+
+def compact_job(job):
+    return {**job, "description": job.get("description", "")[:300]}
+
+
+def enriched_applications(session_id):
+    return [{**application, "job": compact_job(job) if (job := jobs.find_job(application["job_id"])) else None}
+            for application in store.applications(session_id)]
+
+
+# Kept as a compatibility alias for callers of the initial build.
+_enriched_applications = enriched_applications
 
 
 def respond(session_id: str, message: str, job_id: str | None = None) -> dict:
     state = store.session(session_id)
     intent = _rule_intent(message)
-    if (intent["intent"] == "recommend" and not any((intent["skill"], intent["remote"], intent["query"], intent["reset"]))) or (intent["intent"] in {"apply", "confirm"} and intent["reference"] is None and not job_id):
-        intent = _llm_intent(message, store.history(session_id)) or intent
-    result: dict = {"reply": "", "jobs": [], "applications": [], "profile": None, "action": intent["intent"]}
+    router = "rules"
+    ambiguous = intent["intent"] == "recommend" and intent["remote"] is None and not any(intent.get(key) for key in ("skills", "query", "reset", "more", "location", "level", "clear_skill", "clear_location", "clear_remote", "clear_query", "clear_level"))
+    if ambiguous or (intent["intent"] in {"apply", "confirm", "details"} and intent["reference"] is None and not job_id):
+        interpreted = _llm_intent(message, store.history(session_id))
+        if interpreted:
+            intent, router = interpreted, "openai"
+    result = {"reply": "", "jobs": [], "profile": None, "action": intent["intent"], "router": router,
+              "application_mode": application_mode(), "tools": []}
     kind = intent["intent"]
-    if kind == "apply":
+    if kind in {"apply", "confirm", "details"}:
         job = jobs.find_job(job_id) if job_id else _resolve_job(state, intent.get("reference"))
         if not job:
-            result["reply"] = "I could not identify that job. Ask for recommendations, then say ‘apply to job 3’ using one of the numbered results."
+            result["reply"] = "I could not identify that job. Use a number from the latest results, such as ‘apply to job 3’, or select a job card."
+        elif kind == "details":
+            result.update(reply=f"Here is the full listing for {job['title']} at {job['company']}.", job_detail={**job, "active": jobs.is_active(job)}, tools=["job_details"])
+        elif kind == "apply":
+            if not state["profile"]:
+                result["reply"] = "Upload your resume first so I can associate the application with your profile."
+            elif not jobs.is_active(job):
+                result["reply"] = "This listing has expired. Ask for new matches before starting another application."
+            else:
+                application = store.create_application(session_id, job["id"], application_mode())
+                result["application"] = {**application, "job": compact_job(job)}
+                result["tools"] = ["apply_to_job"]
+                if application["duplicate"]:
+                    result["reply"] = f"{job['title']} at {job['company']} is already in your tracker. I kept the existing record and date."
+                elif application["delivery"] == "simulation":
+                    result["reply"] = f"Demo application recorded for {job['title']} at {job['company']}. Receipt: {application['receipt']}. This simulated submission has not been sent to the employer."
+                else:
+                    result["reply"] = f"I started your application to {job['title']} at {job['company']}. Complete the original application page below, then select ‘I submitted this’ to update your tracker."
+                result["applications"] = enriched_applications(session_id)
         else:
-            app = store.create_application(session_id, job["id"])
-            result["application"] = {**app, "job": job}
-            result["reply"] = (f"I saved {job['title']} at {job['company']} to your application tracker. "
-                               "Open the employer's application page and submit there. When finished, tell me ‘I submitted job "
-                               f"{intent['reference']}’ so I can mark it submitted. Current status: "
-                               + ("submitted" if app["status"] == "submitted" else "awaiting external submission") + ".")
-    elif kind == "confirm":
-        job = jobs.find_job(job_id) if job_id else _resolve_job(state, intent.get("reference"))
-        if not job:
-            result["reply"] = "Tell me which numbered job you submitted, for example ‘I submitted job 3’."
-        else:
-            app = store.confirm_application(session_id, job["id"])
-            result["reply"] = (f"Marked {job['title']} at {job['company']} as submitted."
-                               if app else "That job is not in your tracker yet. Ask me to apply first.")
-            result["applications"] = _enriched_applications(session_id)
+            application = store.confirm_application(session_id, job["id"])
+            result.update(reply=(f"Marked {job['title']} at {job['company']} as submitted, based on your confirmation."
+                                 if application else "Start that application first so I can add it to your tracker."),
+                          applications=enriched_applications(session_id), tools=["confirm_application"])
     elif kind == "status":
-        result["applications"] = _enriched_applications(session_id)
-        result["reply"] = (f"You have {len(result['applications'])} tracked application(s). Submitted means you confirmed the external application was completed."
-                           if result["applications"] else "No applications yet. Ask me to apply to a numbered job to start tracking it.")
+        applications = enriched_applications(session_id)
+        result.update(applications=applications, tools=["application_status"],
+                      reply=f"You have {len(applications)} tracked application{'s' if len(applications) != 1 else ''}." if applications else "No applications yet. Ask me to apply to a numbered job to start one.")
     elif kind == "profile":
-        result["profile"] = state["profile"]
-        result["reply"] = "Here is what I extracted from your resume. Tell me if I should refine the search."
-        if not state["profile"]:
-            result["reply"] = "Upload a PDF or DOCX resume first, and I’ll extract your details."
+        result.update(profile=state["profile"], tools=["candidate_profile"],
+                      reply="Here is your extracted profile. You can correct it in chat, for example ‘my role is frontend developer’ or ‘I have 6 months of experience’." if state["profile"] else "Upload a PDF or DOCX resume to build your profile.")
     elif kind == "help":
-        result["reply"] = "Upload a resume, ask for matches, refine with ‘remote React roles’, say ‘apply to job 3’, then ‘show my applied jobs’. Applications open at the original job site; tell me when you have submitted one."
+        result["reply"] = "I can read your resume, explain job matches, refine by technology, location or experience, and track applications. Try ‘React jobs in India’, ‘only internships’, ‘show more’, or ‘apply to job 3’."
     else:
-        filters = {} if intent.get("reset") else dict(state["filters"])
-        for key in ("skill", "remote", "location", "query"):
-            value = intent.get(key)
-            if value:
-                filters[key] = value
-        if intent.get("reset"):
-            filters = {}
-        if not state["profile"] and not filters and not intent.get("reset"):
-            result["reply"] = "Upload your resume to get tailored matches, or ask for something specific like ‘remote Python jobs’."
-        else:
-            found = jobs.rank_jobs(state["profile"], filters)
-            store.update_session(session_id, filters=filters, last_jobs=[job["id"] for job in found])
-            result["jobs"] = found
-            result["filters"] = filters
-            result["reply"] = (f"I found {len(found)} roles ranked for you. You can refine by skill or location, or say ‘apply to job 3’."
-                               if found else "No roles match those filters in the current dataset. Try clearing a filter or asking for another skill.")
+        if kind == "update_profile":
+            if not state["profile"]:
+                result["reply"] = "Upload a resume first, then I can update your extracted profile."
+            else:
+                profile = dict(state["profile"])
+                if intent.get("designation"):
+                    profile["designation"] = intent["designation"]
+                if intent.get("years_experience") is not None:
+                    profile.update(years_experience=round(intent["years_experience"], 2),
+                                   experience_months=round(intent["years_experience"] * 12), experience_source="Confirmed by you")
+                state["profile"] = profile
+                store.update_session(session_id, profile=profile)
+                result["profile"] = profile
+                result["tools"].append("update_profile")
+        if not result["reply"]:
+            filters = {} if intent.get("reset") else dict(state["filters"])
+            if intent.get("clear_skill"):
+                filters.pop("skills", None)
+                filters.pop("skill", None)
+            if intent.get("clear_location"):
+                filters.pop("location", None)
+            for key in ("remote", "location", "query", "level", "max_years"):
+                if intent.get(key) is not None:
+                    filters[key] = intent[key]
+            for switch, key in (("clear_remote", "remote"), ("clear_query", "query"), ("clear_level", "level")):
+                if intent.get(switch):
+                    filters.pop(key, None)
+            selected_skills = intent.get("skills") or ([intent["skill"]] if intent.get("skill") else [])
+            if selected_skills:
+                filters["skills"] = selected_skills
+            offset = filters.pop("offset", 0) + 6 if intent.get("more") else 0
+            filters["offset"] = offset
+            if not state["profile"] and not any(value for key, value in filters.items() if key != "offset") and not intent.get("reset"):
+                result["reply"] = "Upload your resume for tailored recommendations, or tell me a role or technology to search for."
+            else:
+                found = jobs.search_jobs(state["profile"], filters, offset=offset)
+                if not found["jobs"] and offset and found["total"]:
+                    result["reply"] = "You’ve reached the end of these matches. Clear a filter to broaden your search."
+                    filters["offset"] = max(0, offset - 6)
+                else:
+                    store.update_session(session_id, last_jobs=[job["id"] for job in found["jobs"]])
+                    result["reply"] = (f"Here are {len(found['jobs'])} of {found['total']} matching roles. Each card explains the fit."
+                                       if found["jobs"] else "No roles match your current profile and filters. Try ‘clear filters’, another skill, or a different location.")
+                store.update_session(session_id, filters=filters)
+                result.update(jobs=[compact_job(job) for job in found["jobs"]], total=found["total"], has_more=found["has_more"], filters=filters)
+                result["tools"].append("match_jobs")
+    result["application_count"] = len(store.applications(session_id))
     store.add_message(session_id, "user", message)
-    store.add_message(session_id, "assistant", result["reply"])
+    store.add_message(session_id, "assistant", result["reply"], result)
     return result
-
-
-def _enriched_applications(session_id: str):
-    return [{**app, "job": jobs.find_job(app["job_id"])} for app in store.applications(session_id)]

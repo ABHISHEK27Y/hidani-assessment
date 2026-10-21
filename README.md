@@ -1,88 +1,116 @@
-# Orbit — conversational job search assistant
+# Orbit — a conversational job search workspace
 
-Orbit is a single-service AI job chat assistant built for the Hidani Tech SDE Intern assessment. A candidate uploads a PDF or DOCX resume, reviews extracted details, asks for matching jobs, refines the search in conversation, and tracks application progress. The committed JSON catalogue contains **1,800 real job listings** collected from the public Himalayas Jobs API on 21 October 2026.
+Orbit reads a resume, explains relevant jobs, refines results through conversation, and keeps application progress in one workspace. It is built for the Hidani Tech SDE Intern assessment with Python/FastAPI, browser JavaScript, a 1,800-job JSON snapshot, and SQLite. The interface uses black glass panels and muted purple accents, with desktop, tablet and phone layouts.
 
-> **Honest application status:** Public job boards do not provide a universal unauthenticated employer submission API. “Start application” stores the job once and opens its original application link. The record stays **awaiting external submission** until the candidate confirms they submitted on the employer site. Orbit never claims a third-party submission it cannot verify.
+![Orbit desktop workspace](docs/screenshots/desktop.jpg)
 
-## Run locally
+## Local setup
 
-Requires Python 3.11+.
+Requires Python 3.11 or newer. The top-level dependency versions are pinned to the versions used during verification.
 
 ```bash
 python -m venv .venv
-# Windows: .venv\Scripts\activate
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
 # macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+pip install -r requirements-dev.txt
+python -m uvicorn app.main:app --reload --no-access-log
 ```
 
-Open `http://127.0.0.1:8000`. The app works without an LLM key using a deterministic intent router. To enable LLM-assisted intent interpretation, set `OPENAI_API_KEY` in your shell or host; `.env.example` documents the available variables but the app does not load a `.env` file automatically. For ambiguous messages, OpenAI function calling selects the `route_job_request` tool with a strict schema. The model only chooses intent and filters; job facts, ranking, and application state remain grounded in local data.
+Open `http://127.0.0.1:8000`. Copy `.env.example` to `.env` to configure the app; `.env` is loaded automatically and excluded from Git. `requirements.txt` contains runtime dependencies, while `requirements-dev.txt` adds tests and the HTTP verifier.
 
-Run the core flow tests:
+| Variable | Default | Purpose |
+|---|---|---|
+| `DATABASE_PATH` | `data/app.db` | Persistent profile, conversation and application database |
+| `JOBS_PATH` | `data/jobs.json` | Job snapshot location |
+| `OPENAI_API_KEY` | unset | Enable optional intent interpretation through OpenAI function calling |
+| `OPENAI_MODEL` | `gpt-4o-mini` | Model for ambiguous requests |
+| `APPLICATION_MODE` | `assisted` | Assisted external handoff, or explicit `simulation` for assessment demos |
 
-```bash
-python -m pytest -q --basetemp=.pytest_run
-```
+The local router supports resume-driven matching, remote/on-site filters, multiple skills, countries, entry-level and internship filters, pagination, profile corrections, job details, application initiation and status queries. An optional LLM interprets ambiguous phrasing using a strict function schema. The app continues with the local router if the provider times out or returns invalid arguments. No OpenAI key was available during this review: provider integration and failure paths are tested with mocks, not a paid live call.
 
-`pytest` is a development dependency; install it with `pip install pytest` if needed.
+## Application behavior
+
+In **assisted mode**, “apply to job 3” saves a single application record and returns the API-provided original application link. The status is `awaiting_submission`. After the candidate completes the external form, “I submitted job 3” or the corresponding button records their confirmation and submission timestamp.
+
+In **simulation mode**, the same command completes an explicitly labeled local demo submission with a `SIM-…` receipt. The UI identifies this mode and every simulated record. It sends no application to an employer. Set `APPLICATION_MODE=simulation` and restart to demonstrate this workflow.
+
+**Actual automatic submission to third-party employers is not implemented.** It requires an authorized integration for each employer/ATS. This distinction is also recorded in the assessment checklist; a local receipt or candidate confirmation is not evidence of employer receipt. The source job site may present its own verification or login page.
 
 ## Architecture and dataflow
 
 ```mermaid
 flowchart LR
-  Browser[Chat UI] --> API[FastAPI]
-  API --> Orchestrator[Conversation orchestrator]
-  API --> Parser[PDF and DOCX parser]
-  Parser --> Profile[Structured candidate profile]
-  Profile --> SQLite[(SQLite sessions)]
-  Orchestrator --> Matcher[Explainable matcher]
-  Matcher --> Jobs[(1,800-job JSON catalogue)]
-  Orchestrator --> Applications[(SQLite application tracker)]
-  Orchestrator -. optional ambiguous intent .-> LLM[OpenAI API]
-  Scraper[Rate-limited collection script] --> Jobs
-  Scraper --> Himalayas[Himalayas public API]
+  UI[Conversation UI] --> API[FastAPI]
+  API --> Parse[Resume parsing tool]
+  Parse --> Profile[Structured profile]
+  Profile --> DB[(SQLite)]
+  API --> Agent[Orchestrator]
+  Agent -. ambiguous intent .-> LLM[Optional OpenAI function call]
+  Agent --> Match[Matching tool]
+  Match --> JSON[(Job JSON snapshot)]
+  Agent --> Apply[Application and status tools]
+  Apply --> DB
+  Agent --> Memory[Conversation memory]
+  Memory --> DB
+  Scrape[Rate-limited collector] --> Public[Himalayas public API]
+  Scrape --> JSON
 ```
 
-The orchestrator in `app/agent.py` routes natural-language requests to specialized parsing, matching, application, and status tools. Clear commands use a deterministic router; an optional LLM function call interprets ambiguous messages. It cannot write an application or invent a listing. The resume parser extracts only text from the uploaded file and stores a structured profile rather than the original resume. Matching combines designation tokens, skill overlap, experience constraints, and conversational filters, then returns a reason for each result. SQLite enforces one application per anonymous session and job ID.
+- **Parsing:** PyMuPDF extracts PDF text and python-docx preserves paragraph/table order. Section-aware parsing detects role titles, skills, contact, education and projects. Dated work ranges are unioned to prevent double counting; education and project dates are excluded from work duration. Raw files and raw resume text are not stored.
+- **Matching:** Explicit skill filters, role alignment, work duration, seniority, country restrictions and known country timezone offsets constrain results. The ranking explains shared skills and missing experience information. Unknown numeric experience is not invented. A relevance score is not an offer probability.
+- **Orchestration:** `app/agent.py` validates optional model arguments before invoking tools. Clear commands use local rules. The model cannot invent listings or directly modify the database. Resume text and profile payloads are not included in the model request; recent conversation text is used for context.
+- **Memory:** Rich message payloads restore profile cards, job results and application records after reload. The server keeps up to 200 messages per workspace and returns the latest 40.
+- **Persistence:** SQLite transactions and a unique `(session_id, job_id)` key prevent duplicates, including simultaneous requests. Started and submitted timestamps are distinct. The browser holds an anonymous UUID; there is no account creation.
 
-Anonymous sessions use a browser-generated UUID in `localStorage`. There is no account recovery or cross-device sync. The UUID is a bearer token, so anyone with it can view that session's profile and tracker. Avoid using real sensitive resumes on a shared public demo; use a sample resume for the recording. The original uploaded file is not retained.
+Anonymous UUIDs act as bearer secrets. Anyone who knows a workspace ID can access that workspace. This is a no-auth assessment app with local SQLite storage, not an encrypted vault or cross-device account system. Do not publish the application database, `.env`, private resume, or private test files. The repository ignores PDF/DOCX files and temporary verification data.
 
 ## API
 
-| Route | Purpose |
+Interactive schemas are available at `/docs` and `/openapi.json`.
+
+The `/docs` page loads Swagger assets from jsDelivr and uses a nonced initializer. The main workspace uses only local assets. `/openapi.json` remains available without the documentation CDN.
+
+| Endpoint | Input / result |
 |---|---|
-| `GET /health` | Readiness and catalogue count |
-| `GET /api/bootstrap?session_id=<uuid>` | Load session profile, filters, and applications |
-| `POST /api/resume` | Multipart `session_id` and `file`; returns parsed profile and initial matches |
-| `POST /api/chat` | JSON `session_id`, `message`, optional `job_id`; returns reply and tool results |
+| `GET /health` | Database readiness, total/active jobs, provider configuration and application mode |
+| `GET /api/bootstrap?session_id=<uuid>` | Profile, filters, application count and rich history |
+| `POST /api/resume` | Multipart `session_id` and PDF/DOCX `file`; profile plus initial matches |
+| `POST /api/chat` | JSON `session_id`, `message`, optional stable `job_id`; conversational tool result |
+| `GET /api/jobs/{job_id}` | Full description, restrictions, skills, source and expiry state |
+| `GET /api/applications?session_id=<uuid>` | Workspace application records |
+| `POST /api/applications` | JSON `session_id`, `job_id`, `action` (`start` or `confirm`) |
+| `DELETE /api/session/{session_id}` | Clear that workspace's profile, messages and applications |
 
-Resume uploads are limited to 8 MB and PDFs to 20 pages. Unreadable or scanned resumes return a clear 422 response. Invalid job references receive a conversational recovery message. A matching query with no results suggests changing filters.
+Validation errors use 422, unknown job details use 404, oversized request bodies use 413, and rate limits use 429 with `Retry-After`. File uploads are limited to 8 MB, PDFs to 20 pages, and DOCX expansion to 32 MB. The request body is bounded before multipart parsing. Chat messages are trimmed, length-limited and validated. Responses include request IDs, security headers, and private API cache controls. Logs omit access URLs to avoid logging workspace IDs.
 
-## Job data
-
-`scripts/scrape_jobs.py` paginates the [Himalayas public Jobs API](https://himalayas.app/api) using opaque cursors, retries transient errors and rate limits, deduplicates by source job ID, normalizes description HTML to text, and writes `data/jobs.json` atomically. Every result retains source attribution and the API-provided application URL, as required by the [Himalayas API terms](https://himalayas.app/terms). Run a refresh with:
+## Job collection
 
 ```bash
 python scripts/scrape_jobs.py --target 1800
+python scripts/audit_dataset.py
+# Optional small external link sample:
+python scripts/audit_dataset.py --check-links 10
 ```
 
-The scraper refuses to write fewer than 1,500 valid listings. It does not fabricate missing experience or skill information: unknown experience is labeled `Not specified`, and skills are extracted from listing text using a transparent vocabulary. Expired jobs are excluded by the collector and the matcher. Jobs are a snapshot, so source availability may change after collection. Refresh and verify the dataset immediately before submitting.
+The collector uses the [Himalayas public API](https://himalayas.app/api). It seeds entry-level software opportunities, then collects software-related and general listings until it has 1,800 unique valid records with extractable skills. It retains source IDs, attribution, the original application link, full country/timezone restrictions, seniority, timestamps and descriptions. Missing numeric experience stays `Not specified`. The final JSON is written atomically; an undersized collection fails before replacing the previous snapshot.
 
-## Deployment
+The app preserves [Himalayas attribution and application-link requirements](https://himalayas.app/terms). It excludes expired listings from recommendations. Refresh the snapshot before submission; API expiry metadata cannot establish whether an employer still accepts applications. During this review, ten sampled source-page HTTP checks returned 403 and the normal browser showed a security-verification page. Their external page availability is therefore unverified.
 
-The included Dockerfile serves both frontend and API. For Railway, create a project from the public GitHub repository, let it detect the Dockerfile, generate a public domain, and add a **persistent volume mounted at `/data`**. Set `DATABASE_PATH=/data/app.db` and optionally `OPENAI_API_KEY` and `OPENAI_MODEL`. Keep the service at one replica when using SQLite. Configure `/health` as its health check. A persistent volume is necessary because applications and session profiles must survive redeploys. Verify the public `/health` endpoint reports `1800` jobs, then test upload, search, start application, confirm submission, and status on the live domain.
+## Verification
 
-The Docker image includes the JSON snapshot. Refreshing jobs requires rerunning the scraper, committing the updated file, and redeploying. No personal resume file or application database belongs in the public repository.
+```bash
+python -m pytest -q --basetemp=.pytest_run
+python scripts/verify_local.py --base-url http://127.0.0.1:8000 --resume /absolute/path/to/cv.pdf
+node --check static/app.js
+```
 
-## Assessment submission checklist
+The private-resume verifier accepts only localhost URLs, omits contact values from its report, and deletes its test workspace afterwards. Tests cover PDF/DOCX parsing, date ranges, skills, matching, geography and timezone filters, pagination, API validation, malicious/invalid tool arguments, provider failure, duplicate writes, session isolation, application modes, expiry and state restoration. Browser checks cover upload, filtering, detail dialogs, application initiation, reset, fixed scrolling and responsive layouts.
 
-- [x] Public-source scraper and 1,800-listing JSON database
-- [x] Resume upload, extraction, matching, conversational filters, application tracking
-- [x] Duplicate protection and error paths
-- [x] README with setup, architecture, dataflow, and APIs
-- [ ] Public GitHub repository
-- [ ] Persistent deployment and verified live link
-- [ ] 3–5 minute screen recording showing upload → parsed profile → recommendations → refinement → start application → external site → confirmed status
-- [ ] Final check of source links, mobile layout, and deployment logs
+See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the project review](REVIEW.md), [the delivery phases](PHASES.md), and [the recording outline](DEMO.md).
 
-See `PHASES.md` for the five-phase delivery plan and `DEMO.md` for a four-minute recording outline.
+Final local review: 39 automated tests and 15 actual-resume HTTP checkpoints passed. A fresh isolated installation was attempted but did not finish because PyPI requests timed out; the test results describe the existing verified environment. Run the prepared GitHub Actions workflow and a clean installation before release.
+
+## Release phase
+
+Deployment and public repository publication are deferred at the user's request. The Dockerfile is prepared, but its image has not been built here because Docker's local engine was unavailable. For a later Railway release, use a persistent volume at `/data`, set `DATABASE_PATH=/data/app.db`, configure `/health`, keep one replica for SQLite, and repeat the full workflow on the public domain. The live link, public GitHub repository and 3–5 minute recording remain submission deliverables.

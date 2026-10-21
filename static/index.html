@@ -1,53 +1,75 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f7f8fb" />
-  <title>Orbit — your next role, in focus</title>
-  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="/static/styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b0f">
+  <meta name="description" content="A private job search workspace. Read your resume, explore relevant roles, and keep your applications in view.">
+  <title>Orbit — your job search workspace</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#message-input">Skip to conversation</a>
   <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand"><div class="brand-mark">✳</div><div><strong>orbit</strong><span>career copilot</span></div></div>
-      <div class="sidebar-section-label">WORKSPACE</div>
-      <button class="side-link active" id="nav-chat"><span class="icon">◫</span> Assistant <span class="active-dot"></span></button>
-      <button class="side-link" id="nav-applications"><span class="icon">▤</span> Applications <span class="count" id="application-count">0</span></button>
-      <div class="sidebar-spacer"></div>
-      <div class="sidebar-bottom">
-        <div class="sidebar-card"><div class="sidebar-card-icon">✦</div><strong>A clearer path forward</strong><p>Find roles that fit your story, not just your keywords.</p></div>
-        <div class="sidebar-footer">Built for thoughtful job search <span>v1.0</span></div>
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <a class="brand" href="/" aria-label="Orbit home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12"/><ellipse cx="18" cy="18" rx="7" ry="16" transform="rotate(40 18 18)"/><circle cx="27" cy="9" r="2.8"/></svg></span><span>orbit<span class="brand-period">.</span></span></a>
+      <button class="new-search" id="new-search" aria-label="New workspace" title="New workspace"><span data-icon="plus"></span><span class="nav-label">New workspace</span><kbd>↗</kbd></button>
+      <p class="section-label">WORKSPACE</p>
+      <nav>
+        <button class="side-link active" id="nav-chat" aria-label="Conversation" aria-current="page"><span data-icon="chat"></span><span class="nav-label">Conversation</span><span class="nav-indicator"></span></button>
+        <button class="side-link" id="nav-applications" aria-label="Applications"><span data-icon="briefcase"></span><span class="nav-label">Applications</span><span class="count" id="application-count">0</span></button>
+        <button class="side-link" id="nav-profile" aria-label="Resume profile"><span data-icon="user"></span><span class="nav-label">Resume profile</span></button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="privacy-note"><span data-icon="shield"></span><div><strong>A space for your search</strong><p>Your resume file is read here and isn’t saved. Your profile stays in this workspace.</p></div></div>
+        <div class="sidebar-signature"><span class="tiny-orbit"></span><span>One step closer.</span><span class="version">01</span></div>
       </div>
     </aside>
 
     <main class="main-panel">
-      <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><span class="slash">/</span><strong>Assistant</strong></div><div class="topbar-right"><span class="status-indicator"></span><span id="dataset-count">Live job catalogue</span></div></header>
-      <div class="conversation" id="conversation" aria-live="polite">
-        <section class="welcome">
-          <div class="eyebrow"><span class="eyebrow-star">✳</span> YOUR CAREER, IN MOTION</div>
-          <h1>Find work that <em>fits.</em></h1>
-          <p>Tell me where you want to go. I’ll read your resume, find relevant opportunities, and help you keep track of every next step.</p>
+      <header class="topbar">
+        <div class="breadcrumbs"><span class="desktop-label">Workspace</span><span class="desktop-label slash">/</span><span id="view-label">Conversation</span></div>
+        <div class="topbar-actions"><span class="connection" id="connection"><i></i><span id="connection-label">Connecting</span></span><button class="icon-button mobile-action" id="mobile-applications" aria-label="Show applications"><span data-icon="briefcase"></span></button><button class="icon-button" id="profile-button" aria-label="Show resume profile"><span data-icon="user"></span></button></div>
+      </header>
+
+      <div class="conversation" id="conversation" aria-label="Job search conversation" tabindex="0">
+        <section class="welcome" id="welcome">
+          <div class="welcome-label"><span class="label-line"></span> A LITTLE DIRECTION GOES A LONG WAY</div>
+          <h1>Your next role,<br><span>in focus.</span></h1>
+          <p class="welcome-copy">Bring your experience. Find where it belongs.<br>Explore real opportunities, one conversation at a time.</p>
+          <div class="upload-card" id="upload-dropzone" role="region" aria-label="Resume upload. You can also drag a file here.">
+            <div class="file-symbol"><span data-icon="file"></span><span class="file-corner">+</span></div>
+            <div class="upload-copy"><strong>Start with your resume</strong><span>Drop a file here · PDF or DOCX · up to 8 MB</span></div>
+            <button class="button button-primary" id="welcome-upload">Choose file <span data-icon="arrow-up-right"></span></button>
+          </div>
+          <div class="starter-section"><p>OR START WITH A QUESTION</p><div class="starter-prompts"><button data-prompt="Show remote React jobs"><span data-icon="globe"></span>Remote React roles<span data-icon="arrow-up-right"></span></button><button data-prompt="Show entry-level software engineering jobs"><span data-icon="layers"></span>Entry-level opportunities<span data-icon="arrow-up-right"></span></button><button data-prompt="What can you do?"><span data-icon="compass"></span>Explore the workspace<span data-icon="arrow-up-right"></span></button></div></div>
         </section>
-        <div class="message-row assistant initial"><div class="avatar">✳</div><div class="message-content"><div class="speaker">Orbit <span>AI assistant</span></div><div class="bubble">Hi! Upload your resume to get tailored matches, or tell me what kind of role you’re looking for. You can search, refine, and track applications right here in the conversation.</div><div class="suggestions" id="suggestions"><button data-prompt="Show me remote software engineering jobs">Explore remote roles <span>↗</span></button><button data-prompt="What can you do?">What can you do? <span>↗</span></button></div></div></div>
-        <div id="messages"></div>
+        <div id="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <div id="typing-status" class="visually-hidden" role="status"></div>
       </div>
+
       <div class="composer-wrap">
-        <div class="composer"><button class="attach" id="attach-button" title="Upload a PDF or DOCX resume" aria-label="Upload resume">＋</button><input id="resume-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden><textarea id="message-input" rows="1" placeholder="Ask about jobs, skills, applications..." aria-label="Message Orbit"></textarea><button id="send-button" class="send" aria-label="Send message">↑</button></div>
-        <div class="composer-hint"><span>Attach a PDF or DOCX resume to personalize your search</span><span>Enter to send · Shift+Enter for a new line</span></div>
+        <div class="filter-strip" id="filter-strip" aria-label="Active search filters" hidden></div>
+        <div class="composer" id="composer"><button class="attach icon-button" id="attach-button" aria-label="Upload a PDF or DOCX resume" title="Attach resume"><span data-icon="paperclip"></span></button><textarea id="message-input" rows="1" maxlength="2000" placeholder="Tell me what you’re looking for…" aria-label="Message Orbit"></textarea><button id="send-button" class="send" aria-label="Send message"><span data-icon="arrow-up"></span></button></div>
+        <input id="resume-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+        <div class="composer-hint"><span id="composer-note">A conversation, built around your experience.</span><span class="keyboard-hint"><kbd>↵</kbd> to send</span></div>
       </div>
     </main>
 
-    <aside class="insights-panel">
-      <div class="insights-head"><span>YOUR SPACE</span><span class="head-symbol">✳</span></div>
-      <div class="profile-box" id="profile-box"><div class="profile-empty"><div class="profile-empty-icon">↥</div><strong>Your profile starts here</strong><p>Upload a resume and I’ll turn it into a useful snapshot for your search.</p><button id="rail-upload">Upload resume <span>↗</span></button></div></div>
-      <div class="insight-divider"></div>
-      <div class="insight-title"><span>HOW IT WORKS</span><span>01 — 03</span></div>
-      <div class="steps"><div class="step"><span>01</span><div><strong>Share your story</strong><p>Upload a resume. Review the details I find.</p></div></div><div class="step"><span>02</span><div><strong>Explore your matches</strong><p>Ask for jobs and refine with natural language.</p></div></div><div class="step"><span>03</span><div><strong>Make your move</strong><p>Open the original application and track progress here.</p></div></div></div>
-      <div class="source-note">Job listings link to their original source. Submission happens on the employer’s application page.</div>
+    <aside class="insights-panel" aria-label="Search context">
+      <div class="insights-head"><span class="section-label">IN YOUR ORBIT</span><span class="context-dot"></span></div>
+      <div class="catalogue-card glass-card"><div class="catalogue-top"><span data-icon="globe"></span><span class="live-pill">OPEN ROLES</span></div><div class="catalogue-number" id="dataset-count">—</div><p>Real opportunities.<br>A more considered search.</p><div class="catalogue-source">Sourced from <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas <span>↗</span></a></div></div>
+      <div class="context-heading"><h2>Your profile</h2><button id="rail-upload" class="text-button">Upload <span>+</span></button></div>
+      <div id="profile-box" class="profile-box"><div class="profile-placeholder"><span data-icon="fingerprint"></span><p>Your experience is the starting point.</p><span>Upload a resume to see your skills and work history here.</span></div></div>
+      <div class="workspace-note"><span class="small-dash"></span><p>Refine by skill, location, or experience.<br>Your next question shapes the results.</p></div>
+      <div class="source-note" id="application-note"><span data-icon="external"></span><p>Applications continue on the original job site. Keep your progress here.</p></div>
     </aside>
   </div>
+  <dialog id="detail-dialog" aria-labelledby="detail-title"><div class="dialog-top"><span class="section-label">THE OPPORTUNITY</span><button class="icon-button dialog-close" aria-label="Close job details"><span data-icon="close"></span></button></div><div id="detail-content"></div></dialog>
+  <dialog id="profile-dialog" aria-labelledby="profile-title"><div class="dialog-top"><span class="section-label" id="profile-title">YOUR RESUME PROFILE</span><button class="icon-button dialog-close" aria-label="Close profile"><span data-icon="close"></span></button></div><div id="profile-content"></div></dialog>
+  <dialog id="reset-dialog" aria-labelledby="reset-title"><div class="dialog-top"><span class="section-label">A FRESH START</span><button class="icon-button dialog-close" aria-label="Cancel"><span data-icon="close"></span></button></div><h2 id="reset-title">Start a new workspace?</h2><p class="dialog-copy">This clears your stored profile, conversation, and application tracker from this workspace.</p><div class="dialog-actions"><button class="button button-quiet" id="cancel-reset">Keep this workspace</button><button class="button button-primary" id="confirm-reset">Clear and start again</button></div></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
   <script src="/static/app.js" defer></script>
 </body>
 </html>

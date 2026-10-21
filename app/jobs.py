@@ -1,4 +1,4 @@
-"""Validated job catalogue and explainable, deterministic ranking."""
+"""Grounded, explainable matching against the validated JSON catalogue."""
 from __future__ import annotations
 
 import json
@@ -7,102 +7,156 @@ import re
 from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import urlparse
 
-JOBS_PATH = Path(os.getenv("JOBS_PATH", "data/jobs.json"))
-STOP = {"and", "the", "for", "with", "job", "jobs", "role", "roles", "remote", "only", "me"}
+from app.skills import canonical_skill
+
+ROOT = Path(__file__).resolve().parents[1]
+JOBS_PATH = Path(os.getenv("JOBS_PATH", str(ROOT / "data/jobs.json")))
+STOP = {"and", "the", "for", "with", "job", "jobs", "role", "roles", "remote", "only", "me", "a", "an", "engineering", "intern"}
+TECH_ROLE = re.compile(r"software|develop|front.?end|back.?end|full.?stack|web|platform engineer|AI engineer|machine learning|data engineer|devops|site.reliability|\bSRE\b|\bQA\b|test engineer|automation engineer", re.I)
+COUNTRY_OFFSETS = {"india": {5.5}, "united states": {-10, -9, -8, -7, -6, -5},
+                   "united kingdom": {0}, "canada": {-8, -7, -6, -5, -4, -3.5},
+                   "germany": {1}, "france": {1}, "australia": {8, 9.5, 10}, "nepal": {5.75}}
 
 
-@lru_cache(maxsize=1)
 def catalogue() -> list[dict]:
-    if not JOBS_PATH.exists():
-        return []
-    jobs = json.loads(JOBS_PATH.read_text(encoding="utf-8"))
-    if not isinstance(jobs, list):
-        raise ValueError("The job catalogue must be a JSON array")
-    return jobs
+    stat = JOBS_PATH.stat()
+    return _load_catalogue(str(JOBS_PATH.resolve()), stat.st_mtime_ns, stat.st_size)
 
 
-@lru_cache(maxsize=1)
-def by_id() -> dict[str, dict]:
-    return {job["id"]: job for job in catalogue()}
+@lru_cache(maxsize=2)
+def _load_catalogue(path: str, _mtime: int, _size: int) -> list[dict]:
+    records = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(records, list) or not records:
+        raise ValueError("The job catalogue must be a non-empty JSON array")
+    seen = set()
+    for job in records:
+        required = ["id", "title", "company", "location", "experience_required", "description", "source_link", "application_link"]
+        if not isinstance(job, dict) or not all(isinstance(job.get(key), str) and job[key].strip() for key in required):
+            raise ValueError("A job is missing a required text field")
+        if job["id"] in seen or not isinstance(job.get("skills"), list) or not job["skills"] or not all(isinstance(skill, str) and skill.strip() for skill in job["skills"]):
+            raise ValueError("Job IDs must be unique and skills must be non-empty string arrays")
+        seen.add(job["id"])
+        for key in ("source_link", "application_link"):
+            parsed = urlparse(job[key])
+            if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password:
+                raise ValueError("Job links must be valid HTTPS URLs")
+    return records
 
 
-def find_job(job_id: str):
-    return by_id().get(job_id)
+def find_job(job_id: str | None):
+    return next((job for job in catalogue() if job["id"] == job_id), None)
 
 
 def is_active(job: dict) -> bool:
-    expiry = job.get("expires_at")
-    if not expiry:
+    if not job.get("expires_at"):
         return True
     try:
-        return datetime.fromisoformat(expiry) > datetime.now(timezone.utc)
-    except ValueError:
+        value = datetime.fromisoformat(job["expires_at"].replace("Z", "+00:00"))
+        return value.tzinfo is not None and value > datetime.now(timezone.utc)
+    except (ValueError, TypeError):
         return False
 
 
 def _tokens(value: str):
-    return {x.lower() for x in re.findall(r"[a-zA-Z][\w+#.]*", value or "") if len(x) > 2 and x.lower() not in STOP}
+    value = value.lower().replace("engineering", "engineer").replace("front-end", "frontend").replace("front end", "frontend").replace("back-end", "backend").replace("back end", "backend").replace("full-stack", "fullstack").replace("full stack", "fullstack")
+    return {token for token in re.findall(r"[a-z][a-z0-9+#.]*", value) if len(token) > 1 and token not in STOP}
 
 
-def rank_jobs(profile: dict | None, filters: dict, limit=8) -> list[dict]:
+def _required_years(job):
+    explicit = job.get("min_years_experience")
+    title = job["title"]
+    seniority = " ".join(job.get("seniority") or [])
+    inferred = 0
+    if re.search(r"\b(staff|principal|director|head of|executive|architect)\b", title + " " + seniority, re.I):
+        inferred = 7
+    elif re.search(r"\b(senior|sr|lead|manager)\b", title + " " + seniority, re.I):
+        inferred = 5
+    elif re.search(r"\bmid(?:dle)?[ -]level\b", title + " " + seniority, re.I):
+        inferred = 2
+    return max(explicit if explicit is not None else 0, inferred), explicit is not None
+
+
+def search_jobs(profile: dict | None, filters: dict, offset=0, limit=6) -> dict:
     profile = profile or {}
-    designation = profile.get("designation", "")
-    desired = {x.lower() for x in profile.get("skills", [])}
+    designation = profile.get("designation") or ""
+    desired = {canonical_skill(value) for value in profile.get("skills", [])}
     years = profile.get("years_experience")
-    required_skill = (filters.get("skill") or "").lower()
-    query = filters.get("query") or ""
+    title_tokens = _tokens(designation) if designation != "Not found" else set()
+    requested = filters.get("skills") or ([filters["skill"]] if filters.get("skill") else [])
+    requested = {canonical_skill(value) for value in requested}
+    query_tokens = _tokens(filters.get("query") or "")
     location = (filters.get("location") or "").lower()
-    title_tokens = _tokens(designation)
-    query_tokens = {"engineer" if token == "engineering" else token for token in _tokens(query)}
+    location = {"us": "united states", "usa": "united states", "uk": "united kingdom", "in": "india", "bangalore": "india", "bengaluru": "india", "delhi": "india", "mumbai": "india"}.get(location, location)
+    candidate_technical = bool(TECH_ROLE.search(designation))
     ranked = []
     for job in catalogue():
         if not is_active(job):
             continue
-        if filters.get("remote") and not job.get("remote"):
+        if filters.get("remote") is not None and bool(job.get("remote")) != filters["remote"]:
             continue
-        job_location = job.get("location", "").lower()
-        if location and location not in job_location and "worldwide" not in job_location:
+        restrictions = job.get("location_restrictions")
+        location_text = " ".join(restrictions).lower() if restrictions is not None else job["location"].lower()
+        worldwide = not restrictions if restrictions is not None else "worldwide" in location_text
+        if location and not worldwide and location not in location_text:
             continue
-        job_skills = {x.lower() for x in job.get("skills", [])}
-        title = job.get("title", "")
-        text = f"{title} {job.get('description', '')[:2500]}".lower()
-        if required_skill and required_skill not in job_skills and required_skill not in text:
+        timezone_restrictions = job.get("timezone_restrictions") or []
+        if location in COUNTRY_OFFSETS and timezone_restrictions and not COUNTRY_OFFSETS[location].intersection(timezone_restrictions):
             continue
-        if query_tokens and not (all(token in title.lower() for token in query_tokens) or (required_skill and required_skill in text)):
+        title = job["title"]
+        job_skills = {canonical_skill(value) for value in job.get("skills", [])}
+        if requested and not requested <= job_skills:
+            continue
+        if query_tokens and not query_tokens <= _tokens(title):
+            continue
+        if candidate_technical and not TECH_ROLE.search(title):
+            continue
+        required_years, stated_years = _required_years(job)
+        cap = filters.get("max_years")
+        if cap is not None and required_years > cap:
+            continue
+        if years is not None and required_years > years + 0.5:
+            continue
+        if filters.get("level") == "intern" and not re.search(r"\bintern(?:ship)?\b", title + " " + job.get("employment_type", ""), re.I):
+            continue
+        if filters.get("level") == "entry" and required_years > 1:
             continue
         matched = sorted(desired & job_skills)
         title_overlap = title_tokens & _tokens(title)
-        required_years = job.get("min_years_experience")
-        seniority_years = 7 if re.search(r"\b(staff|principal|director)\b", title, re.I) else (5 if re.search(r"\bsenior\b", title, re.I) else None)
-        required_years = required_years or seniority_years
-        experience_fit = years is None or required_years is None or required_years <= years + 1
-        if not experience_fit:
+        if desired and not matched and not title_overlap and not requested and not query_tokens:
             continue
-        score = (5 * len(title_overlap)) + (2.5 * len(matched))
-        if designation and designation != "Not found" and designation.lower() in title.lower():
-            score += 7
-        if desired and not matched and not title_overlap:
-            score -= 3
-        if query_tokens:
-            score += 3 * sum(token in title.lower() for token in query_tokens)
-        if required_skill:
-            score += 4
-        if job.get("published_at"):
-            score += 0.01
+        score = len(title_overlap) * 5 + len(matched) * 2.5
+        if designation != "Not found" and designation and designation.lower().replace(" engineering", " engineer").removesuffix(" intern") in title.lower():
+            score += 6
+        score += len(requested) * 4 + len(query_tokens) * 3
+        # A junior candidate should see junior and internship roles ahead of unspecified seniority.
+        if years is not None and years < 2 and re.search(r"\b(junior|intern|graduate|entry)\b", title, re.I):
+            score += 6
         reasons = []
-        if title_overlap:
-            reasons.append("Role aligns with your designation")
+        if title_overlap or (candidate_technical and TECH_ROLE.search(title)):
+            reasons.append("Aligned with your software experience" if candidate_technical else "Aligned with your role")
         if matched:
-            reasons.append("Shared skills: " + ", ".join(x.title() for x in matched[:4]))
-        if years is not None and required_years is not None and experience_fit:
-            reasons.append("Experience requirement is within your range")
-        if required_skill:
-            reasons.append(f"Includes {filters['skill']}")
+            reasons.append("Shared skills: " + ", ".join(matched[:5]))
+        if stated_years and years is not None:
+            reasons.append(f"Requires {job['experience_required']}; your profile has {profile.get('experience_months', round(years * 12))} months")
+        elif years is not None:
+            reasons.append("Years not specified — check the listing")
+        if requested:
+            reasons.append("Includes " + ", ".join(sorted(requested)))
+        if location:
+            reasons.append("Worldwide listing" if worldwide else f"Location includes {filters['location']}")
         if not reasons:
-            reasons.append("Relevant to your search" if query_tokens else "Recent open role")
-        ranked.append((score, job.get("published_at") or "", job, "; ".join(reasons)))
-    ranked.sort(key=lambda x: (x[0], x[1]), reverse=True)
-    if profile and (desired or title_tokens) and not filters.get("query") and not required_skill:
-        ranked = [item for item in ranked if item[0] > 0]
-    return [{**job, "match_score": round(score, 1), "match_reason": reason} for score, _, job, reason in ranked[:limit]]
+            reasons.append("Matches your search" if query_tokens else "Recent listing")
+        ranked.append((score, job.get("published_at") or "", {**job,
+            "match_score": round(score, 1), "matched_skills": matched,
+            "missing_skills": sorted(job_skills - desired)[:8] if desired else [],
+            "match_reason": "; ".join(reasons),
+        }))
+    ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return {"jobs": [item[2] for item in ranked[offset:offset + limit]],
+            "total": len(ranked), "offset": offset, "has_more": offset + limit < len(ranked)}
+
+
+def rank_jobs(profile: dict | None, filters: dict, limit=8) -> list[dict]:
+    return search_jobs(profile, filters, limit=limit)["jobs"]

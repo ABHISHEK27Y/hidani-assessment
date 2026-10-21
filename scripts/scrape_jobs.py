@@ -20,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from app.resume import SKILLS  # noqa: E402
+from app.skills import extract_skills  # noqa: E402
 
 
 class TextOnly(HTMLParser):
@@ -44,12 +44,16 @@ def normalize(raw: dict, collected_at: str) -> dict | None:
     link = raw.get("applicationLink") or ""
     if not (title and company and link.startswith("https://")):
         return None
-    description = plain(raw.get("description") or raw.get("excerpt") or "")[:8000]
+    description = plain(raw.get("description") or raw.get("excerpt") or "")[:16000]
     skill_text = f"{title} {description}"
-    skills = [name for name, patterns in SKILLS.items() if any(re.search(p, skill_text, re.I) for p in patterns)]
+    skills = extract_skills(skill_text)
+    if not skills or len(description) < 100:
+        return None
     years = re.search(r"(?:minimum of |at least )?(\d{1,2})(?:\s*[-–]\s*\d{1,2})?\+?\s+years?\s+(?:of )?(?:relevant |professional |work )?experience", description, re.I)
     restrictions = raw.get("locationRestrictions") or []
     location = "Remote - " + (", ".join(restrictions[:3]) if restrictions else "Worldwide")
+    if len(restrictions) > 3:
+        location += f" +{len(restrictions) - 3} more"
     published = raw.get("pubDate")
     expires = raw.get("expiryDate")
     if expires:
@@ -67,6 +71,9 @@ def normalize(raw: dict, collected_at: str) -> dict | None:
         "id": "himalayas:" + hashlib.sha256(str(raw.get("guid") or link).encode("utf-8")).hexdigest()[:16],
         "title": title, "company": company, "location": location,
         "remote": True, "employment_type": raw.get("employmentType") or "Not specified",
+        "location_restrictions": restrictions,
+        "timezone_restrictions": raw.get("timezoneRestrictions") or [],
+        "seniority": raw.get("seniority") or [],
         "experience_required": f"{years.group(1)}+ years" if years else "Not specified",
         "min_years_experience": int(years.group(1)) if years else None,
         "skills": skills, "description": description,
@@ -76,11 +83,7 @@ def normalize(raw: dict, collected_at: str) -> dict | None:
     }
 
 
-def request_page(cursor: str | None) -> dict:
-    params = {"limit": "20"}
-    if cursor:
-        params["cursor"] = cursor
-    url = "https://himalayas.app/jobs/api?" + urllib.parse.urlencode(params)
+def request_json(url: str) -> dict:
     for attempt in range(6):
         try:
             request = urllib.request.Request(url, headers={"User-Agent": "HidaniAssessmentJobAssistant/1.0 (educational demo)", "Accept": "application/json"})
@@ -99,6 +102,13 @@ def request_page(cursor: str | None) -> dict:
     raise RuntimeError("Could not fetch jobs")
 
 
+def request_page(cursor: str | None) -> dict:
+    params = {"limit": "20"}
+    if cursor:
+        params["cursor"] = cursor
+    return request_json("https://himalayas.app/jobs/api?" + urllib.parse.urlencode(params))
+
+
 def scrape(target: int, output: Path, delay: float) -> None:
     if not 1500 <= target <= 2000:
         raise ValueError("Target must be between 1500 and 2000")
@@ -106,7 +116,40 @@ def scrape(target: int, output: Path, delay: float) -> None:
     jobs = {}
     cursor = None
     pages = 0
-    while len(jobs) < target:
+    # Seed junior software opportunities before adding the general feed. Keep
+    # actual source restrictions; a remote job is not automatically worldwide.
+    for country in ("India", None):
+        for page in range(1, 7):
+            params = {"q": "software", "seniority": "Entry-level", "sort": "recent", "page": str(page)}
+            if country:
+                params["country"] = country
+            payload = request_json("https://himalayas.app/jobs/api/search?" + urllib.parse.urlencode(params))
+            raw_jobs = payload.get("jobs", [])
+            if not raw_jobs:
+                break
+            for raw in raw_jobs:
+                job = normalize(raw, collected_at)
+                if job:
+                    jobs.setdefault(job["id"], job)
+            print(f"entry_seed={country or 'global'} page={page} unique_jobs={len(jobs)}", flush=True)
+            time.sleep(delay)
+    # Prefer software-related listings with extractable skills. This keeps the
+    # submitted skills field useful instead of padding the snapshot with [] rows.
+    for page in range(1, 201):
+        if len(jobs) >= target:
+            break
+        params = {"q": "software", "sort": "recent", "page": str(page)}
+        payload = request_json("https://himalayas.app/jobs/api/search?" + urllib.parse.urlencode(params))
+        raw_jobs = payload.get("jobs", [])
+        if not raw_jobs:
+            break
+        for raw in raw_jobs:
+            job = normalize(raw, collected_at)
+            if job:
+                jobs.setdefault(job["id"], job)
+        print(f"software_search_page={page} unique_jobs={len(jobs)}", flush=True)
+        time.sleep(delay)
+    while len(jobs) < target and pages < 500:
         payload = request_page(cursor)
         pages += 1
         for raw in payload.get("jobs", []):
