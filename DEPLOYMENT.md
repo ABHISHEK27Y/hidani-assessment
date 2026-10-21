@@ -36,7 +36,7 @@ Copy the example only when `.env` does not already contain your configuration.
 
 The included `render.yaml` defines two resources: a free Docker web service and a free PostgreSQL database. `DATABASE_URL` is filled from the database's internal connection string, so application history is kept outside the web container. The Gemini key is prompted as a secret during Blueprint creation; it is never stored in Git.
 
-1. In the Render Dashboard, select **New → Blueprint** and connect `ABHISHEK27Y/hidani-assessment` on `main`. Render reads `render.yaml`.
+1. Use the [Deploy to Render shortcut](https://render.com/deploy?repo=https://github.com/ABHISHEK27Y/hidani-assessment), or select **New → Blueprint** in the Render Dashboard and connect `ABHISHEK27Y/hidani-assessment` on `main`. Render reads `render.yaml`.
 2. Review the resource list and confirm that **both** the web service and Postgres show the **Free** plan. Enter the Gemini key only in the secret prompt. Do not enable a paid plan or add a persistent disk.
 3. Deploy and wait for `/health` to report `ok: true`, `jobs: 1800`, and `llm_configured: true`.
 4. Run `python scripts/smoke_test.py --base-url https://YOUR-APP.onrender.com` from the local project. It creates fictional data and removes its test workspace.
