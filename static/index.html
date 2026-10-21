@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f7f8fb" />
+  <title>Orbit — your next role, in focus</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">✳</div><div><strong>orbit</strong><span>career copilot</span></div></div>
+      <div class="sidebar-section-label">WORKSPACE</div>
+      <button class="side-link active" id="nav-chat"><span class="icon">◫</span> Assistant <span class="active-dot"></span></button>
+      <button class="side-link" id="nav-applications"><span class="icon">▤</span> Applications <span class="count" id="application-count">0</span></button>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-bottom">
+        <div class="sidebar-card"><div class="sidebar-card-icon">✦</div><strong>A clearer path forward</strong><p>Find roles that fit your story, not just your keywords.</p></div>
+        <div class="sidebar-footer">Built for thoughtful job search <span>v1.0</span></div>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><span class="slash">/</span><strong>Assistant</strong></div><div class="topbar-right"><span class="status-indicator"></span><span id="dataset-count">Live job catalogue</span></div></header>
+      <div class="conversation" id="conversation" aria-live="polite">
+        <section class="welcome">
+          <div class="eyebrow"><span class="eyebrow-star">✳</span> YOUR CAREER, IN MOTION</div>
+          <h1>Find work that <em>fits.</em></h1>
+          <p>Tell me where you want to go. I’ll read your resume, find relevant opportunities, and help you keep track of every next step.</p>
+        </section>
+        <div class="message-row assistant initial"><div class="avatar">✳</div><div class="message-content"><div class="speaker">Orbit <span>AI assistant</span></div><div class="bubble">Hi! Upload your resume to get tailored matches, or tell me what kind of role you’re looking for. You can search, refine, and track applications right here in the conversation.</div><div class="suggestions" id="suggestions"><button data-prompt="Show me remote software engineering jobs">Explore remote roles <span>↗</span></button><button data-prompt="What can you do?">What can you do? <span>↗</span></button></div></div></div>
+        <div id="messages"></div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer"><button class="attach" id="attach-button" title="Upload a PDF or DOCX resume" aria-label="Upload resume">＋</button><input id="resume-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden><textarea id="message-input" rows="1" placeholder="Ask about jobs, skills, applications..." aria-label="Message Orbit"></textarea><button id="send-button" class="send" aria-label="Send message">↑</button></div>
+        <div class="composer-hint"><span>Attach a PDF or DOCX resume to personalize your search</span><span>Enter to send · Shift+Enter for a new line</span></div>
+      </div>
+    </main>
+
+    <aside class="insights-panel">
+      <div class="insights-head"><span>YOUR SPACE</span><span class="head-symbol">✳</span></div>
+      <div class="profile-box" id="profile-box"><div class="profile-empty"><div class="profile-empty-icon">↥</div><strong>Your profile starts here</strong><p>Upload a resume and I’ll turn it into a useful snapshot for your search.</p><button id="rail-upload">Upload resume <span>↗</span></button></div></div>
+      <div class="insight-divider"></div>
+      <div class="insight-title"><span>HOW IT WORKS</span><span>01 — 03</span></div>
+      <div class="steps"><div class="step"><span>01</span><div><strong>Share your story</strong><p>Upload a resume. Review the details I find.</p></div></div><div class="step"><span>02</span><div><strong>Explore your matches</strong><p>Ask for jobs and refine with natural language.</p></div></div><div class="step"><span>03</span><div><strong>Make your move</strong><p>Open the original application and track progress here.</p></div></div></div>
+      <div class="source-note">Job listings link to their original source. Submission happens on the employer’s application page.</div>
+    </aside>
+  </div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
