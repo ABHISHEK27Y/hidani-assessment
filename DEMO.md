@@ -1,5 +1,7 @@
 # Five-minute assessment video script
 
+For a faster walkthrough, use the [three-minute script](VIDEO_3_MINUTE.md) and its [annotated screenshot guide](docs/video-guide/README.md).
+
 Record after the public deployment passes its checks. Speak slowly and pause while results load. Aim for 4:40–5:00. Read the quoted paragraphs; the other lines tell you what to show. Do not describe localhost as a deployed app.
 
 Before recording, open the app and GitHub in two tabs, prepare a readable PDF or DOCX resume, and hide private contact details if needed. Keep API keys and hosting settings off screen. Use assisted mode. This walkthrough does not send a real employer application.

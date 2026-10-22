@@ -121,7 +121,7 @@ node --check static/app.js
 
 The private-resume verifier accepts only localhost URLs, omits contact values from its report, and deletes its test workspace afterwards. Tests cover PDF/DOCX parsing, date ranges, skills, matching, geography and timezone filters, pagination, API validation, malicious/invalid tool arguments, provider failure, duplicate writes, session isolation, application modes, expiry and state restoration. Browser checks cover upload, filtering, detail dialogs, application initiation, reset, fixed scrolling and responsive layouts.
 
-See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the final project report](REVIEW.md), and [the five-minute video script](DEMO.md).
+See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the final project report](REVIEW.md), the [three-minute video script](VIDEO_3_MINUTE.md) with [annotated screenshots](docs/video-guide/README.md), and the longer [five-minute script](DEMO.md).
 
 Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation completed and `pip check` passed. Gemini also passed a live synthetic function call and the full HTTP/orchestrator flow; see [provider evidence](docs/llm-verification.json). GitHub Actions builds and smoke-tests the Docker image; the exact tested commit and run are in [CI evidence](docs/ci-verification.json).
 
