@@ -2,7 +2,7 @@
 
 [![Verify project](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/ABHISHEK27Y/hidani-assessment/actions/workflows/ci.yml)
 
-[Live app](https://orbit-assessment-r2j9.onrender.com) · [Public repository](https://github.com/ABHISHEK27Y/hidani-assessment) · [Download all source files](https://github.com/ABHISHEK27Y/hidani-assessment/archive/refs/heads/main.zip) · [Run and deployment guide](DEPLOYMENT.md)
+[Live app](https://orbit-assessment-r2j9.onrender.com) · [Setup and deployment](DEPLOYMENT.md) · [Assessment checklist](ASSESSMENT_CHECKLIST.md) · [Three-minute recording guide](output/pdf/Orbit_3_Minute_Video_Guide.pdf)
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ABHISHEK27Y/hidani-assessment)
 
@@ -25,7 +25,7 @@ python -m uvicorn app.main:app --reload --no-access-log
 
 Open `http://127.0.0.1:8000`. Copy `.env.example` to `.env` to configure the app; `.env` is loaded automatically and excluded from Git. `requirements.txt` contains runtime dependencies, while `requirements-dev.txt` adds tests and the HTTP verifier.
 
-Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. For Docker Compose, Railway configuration, API-key setup and troubleshooting, follow **[DEPLOYMENT.md](DEPLOYMENT.md)**. `constraints.txt` pins the dependency versions from the isolated environment.
+Windows shortcut: `powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1`. For Render deployment, API-key setup and troubleshooting, follow **[DEPLOYMENT.md](DEPLOYMENT.md)**. `constraints.txt` pins the dependency versions from the isolated environment.
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -121,10 +121,10 @@ node --check static/app.js
 
 The private-resume verifier accepts only localhost URLs, omits contact values from its report, and deletes its test workspace afterwards. Tests cover PDF/DOCX parsing, date ranges, skills, matching, geography and timezone filters, pagination, API validation, malicious/invalid tool arguments, provider failure, duplicate writes, session isolation, application modes, expiry and state restoration. Browser checks cover upload, filtering, detail dialogs, application initiation, reset, fixed scrolling and responsive layouts.
 
-See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md), [the final project report](REVIEW.md), the [three-minute video script](VIDEO_3_MINUTE.md) with [annotated screenshots](docs/video-guide/README.md), and the longer [five-minute script](DEMO.md).
+See [the complete assessment checklist](ASSESSMENT_CHECKLIST.md) and the [three-minute recording guide](output/pdf/Orbit_3_Minute_Video_Guide.pdf). The PDF contains the spoken script and all annotated screenshots in one phone-friendly file.
 
-Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation completed and `pip check` passed. Gemini also passed a live synthetic function call and the full HTTP/orchestrator flow; see [provider evidence](docs/llm-verification.json). GitHub Actions builds and smoke-tests the Docker image; the exact tested commit and run are in [CI evidence](docs/ci-verification.json).
+Final review: 45 automated tests and 15 actual-resume HTTP checkpoints passed. The fresh isolated installation completed and `pip check` passed. Gemini also passed a live synthetic function call and the full HTTP/orchestrator flow. GitHub Actions builds and smoke-tests the Docker image against both SQLite and PostgreSQL.
 
 ## Release phase
 
-The [live Render app](https://orbit-assessment-r2j9.onrender.com) uses a free Docker web service and free PostgreSQL database. Its public `/health` endpoint, all 13 synthetic HTTP smoke checkpoints, and a synthetic Gemini function-routed request passed on 21 October. A fictional resume and application survived a web-service redeployment. The actual 3–5 minute recording remains pending. See [release evidence](docs/final-release-check.json).
+The [live Render app](https://orbit-assessment-r2j9.onrender.com) uses a free Docker web service and free PostgreSQL database. Its public `/health` endpoint, all 13 synthetic HTTP smoke checkpoints, and a synthetic Gemini function-routed request passed on 21 October. A fictional resume and application survived a web-service redeployment. The actual 3–5 minute recording remains pending.

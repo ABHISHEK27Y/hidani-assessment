@@ -37,7 +37,7 @@ def audit(link_count=0):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--check-links", type=int, default=0)
-    parser.add_argument("--output", type=Path, default=ROOT / "docs/data-audit.json")
+    parser.add_argument("--output", type=Path, default=ROOT / "tmp/data-audit.json")
     args = parser.parse_args()
     report = audit(max(0, min(args.check_links, 20)))
     args.output.parent.mkdir(parents=True, exist_ok=True)

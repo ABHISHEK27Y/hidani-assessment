@@ -11,7 +11,7 @@ Reviewed against all three pages of the supplied Hidani Tech assessment. A check
 - [x] **D05 — Done:** Preserve full country and timezone restrictions, seniority, expiry, collection time and the source-provided application link. Expired rows are excluded from recommendations.
 - [ ] **D06 — External check incomplete:** Sampled source pages returned HTTP 403 to the checker; a normal browser showed a security-verification screen. The public JSON API worked. External source pages cannot be marked verified from this environment.
 
-Evidence: `scripts/scrape_jobs.py`, `scripts/audit_dataset.py`, `docs/data-audit.json` and the dataset contract test.
+Evidence: `data/jobs.json`, `scripts/scrape_jobs.py`, `scripts/audit_dataset.py` and the dataset contract test.
 
 ## Expected user flow
 
@@ -37,7 +37,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **R01 — Done:** A conversational assistant, with resume upload in the conversation and subsequent requests handled as messages.
 - [x] **R02 — Done:** An orchestrator with specialized parsing, matching, profile, application and status tools.
 - [x] **R03 — Done:** Gemini is the default function-calling provider. Arguments are validated with the server's schema before dispatch. An explicit OpenAI option retains its strict schema. Invalid arguments, provider failure and Gemini quota exhaustion fall back to local rules without switching providers.
-- [x] **R04 — Done:** Default Gemini 3.5 Flash-Lite passed a live synthetic function call, the local HTTP chat/orchestrator flow, and a hosted Render request that returned `router: gemini`. Keys are stored only in ignored local and hosted secret configuration. Redacted evidence is in `docs/llm-verification.json`.
+- [x] **R04 — Done:** Default Gemini 3.5 Flash-Lite passed a live synthetic function call, the local HTTP chat/orchestrator flow, and a hosted Render request that returned `router: gemini`. Keys are stored only in ignored local and hosted secret configuration.
 - [x] **R05 — Done:** Conversation memory and rich results survive reload through local SQLite or hosted PostgreSQL history.
 - [x] **R06 — Done:** Applications store job ID, initiation/submission dates and status. Duplicate protection is enforced by a unique database key, including simultaneous requests.
 - [x] **R07 — Done:** Unreadable, empty, scanned, password-protected, unsupported and oversized resume errors are handled clearly.
@@ -54,9 +54,9 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **Q05 — Done:** Keyboard labels, dialog close behavior, visible focus, reduced-motion support and icon-only navigation labels checked. This is not a formal WCAG certification.
 - [x] **Q06 — Done:** Reload restores cards and filters; application counts stay in sync; actions on old cards use stable job IDs.
 - [x] **Q07 — Done:** API isolation and workspace reset tested. Resume files, contact values, `.env`, local databases and private test output are excluded from Git.
-- [x] **Q08 — Done:** JavaScript syntax and Python compilation checked. Automated test results and environment details are recorded in `docs/verification.json`.
+- [x] **Q08 — Done:** JavaScript syntax and Python compilation checked. Automated tests are included in `tests/` and run in GitHub Actions.
 - [x] **Q09 — Done:** Interactive API documentation renders with a separate nonce-based policy; the main workspace retains its stricter policy.
-- [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 45 tests passed inside `.venv`, including Gemini routing and provider-isolation regressions. A separate synthetic running-server check passed 13/13 checkpoints. The exact GitHub Actions run and source commit are in `docs/ci-verification.json`.
+- [x] **Q10 — Done:** The isolated installation completed after earlier network timeouts. `pip check` and all 45 tests passed inside `.venv`, including Gemini routing and provider-isolation regressions. A separate synthetic running-server check passed 13/13 checkpoints.
 - [x] **Q11 — Done:** The Render Docker image was tested in GitHub Actions against a real PostgreSQL container. Readiness and all 13 synthetic HTTP smoke checkpoints passed using the Postgres backend.
 
 ## Submission deliverables and timing
@@ -64,7 +64,7 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **S01 — Done:** Full source code exists in the local Git repository.
 - [x] **S02 — Done:** JSON job database and scraper are included.
 - [x] **S03 — Done:** README covers setup, agent architecture, dataflow, APIs, configuration, limitations and verification commands.
-- [x] **S04 — Done:** A timed five-minute script in simple English is prepared in `DEMO.md`, with screen actions and honest application narration.
+- [x] **S04 — Done:** A timed three-minute script, recording setup and all annotated screenshots are embedded in `output/pdf/Orbit_3_Minute_Video_Guide.pdf`.
 - [x] **S05 — Done:** Public source repository: https://github.com/ABHISHEK27Y/hidani-assessment. Its JSON catalogue, scraper, documentation and tests are included.
 - [x] **S06 — Done:** [Render deployment](https://orbit-assessment-r2j9.onrender.com) created a free Docker web service and PostgreSQL database. The public readiness check and all 13 synthetic HTTP smoke checkpoints passed.
 - [ ] **S07 — Pending release:** The actual 3–5 minute screen recording.
@@ -73,4 +73,4 @@ Evidence: parser, matching, agent and HTTP tests; `scripts/verify_local.py`; bro
 - [x] **S10 — Done:** After correcting the Render secret, a synthetic ambiguous request to the public app returned HTTP 200, `router: gemini`, and `action: recommend`. The disposable session was deleted.
 - [x] **S11 — Done:** A fictional resume and application survived a successful Render web-service redeployment. The disposable workspace was then removed.
 
-The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. A separate Linux container run passed the same HTTP flow against PostgreSQL, and the public Render deployment passed all 13 smoke checkpoints plus Gemini routing. The hosted application record survived a redeployment. Release evidence is in `docs/final-release-check.json`. The remaining assessment work is to resolve or disclose the external application requirement, record the live flow, and submit the links. See `DEPLOYMENT.md`.
+The final local recheck passed 45 automated tests, 15 actual-resume HTTP checkpoints and 13 synthetic running-server checkpoints. A separate Linux container run passed the same HTTP flow against PostgreSQL, and the public Render deployment passed all 13 smoke checkpoints plus Gemini routing. The hosted application record survived a redeployment. The remaining assessment work is to resolve or disclose the external application requirement, record the live flow, and submit the links. See `DEPLOYMENT.md`.
